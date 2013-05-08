@@ -26,7 +26,7 @@
                 <em:locale>en-US</em:locale>
                 <em:creator>Eric Y. Chu</em:creator>
                 <em:name>Launchpad</em:name>
-                <em:description>A seppd dial extension.</em:description>
+                <em:description>Visual bookmarks extension.</em:description>
             </Description>
         </em:localized>
         <em:localized>
@@ -34,7 +34,7 @@
                 <em:locale>zh-CN</em:locale>
                 <em:creator>Eric Y. Chu</em:creator>
                 <em:name>Launchpad</em:name>
-                <em:description>目前来说还只是个快速拨号扩展……</em:description>
+                <em:description>可视化书签扩展。</em:description>
             </Description>
         </em:localized>
         <em:targetApplication>

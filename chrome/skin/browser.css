@@ -1,0 +1,42 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#launchpad-mozest-org-toolbar-button
+{
+    list-style-image: url("chrome://launchpad-mozest-org/skin/icons/toolbar-button.png") !important;
+}
+
+
+/* retina */
+@media (min-resolution: 2dppx)
+{
+    #launchpad-mozest-org-toolbar-button
+    {
+        list-style-image: url("chrome://launchpad-mozest-org/skin/icons/toolbar-button@2x.png") !important;
+    }
+}
+
+#launchpad-mozest-org-window
+{
+    background-color: transparent;
+    position: fixed;
+    transition-property: opacity, visibility;
+    transition: visibility 0ms ease 200ms, opacity 200ms ease;
+    visibility: hidden;
+    position: fixed;
+    opacity: 0;
+}
+
+#launchpad-mozest-org-window.open
+{
+    visibility: visible;
+    transition-delay: 0ms;
+    opacity: 1;
+}
+
+#launchpad-mozest-org-browser
+{
+    background-color: transparent;
+}
+

@@ -1,0 +1,4 @@
+content launchpad-mozest-org chrome/content/
+skin    launchpad-mozest-org classic chrome/skin/
+locale  launchpad-mozest-org en-US chrome/locale/en-US/
+locale  launchpad-mozest-org zh-CN chrome/locale/zh-CN/

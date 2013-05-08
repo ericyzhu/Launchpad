@@ -1,0 +1,570 @@
+:root
+{
+    -moz-appearance: none;
+    -moz-user-select: none;
+    font-size: 75%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    cursor: default;
+    padding: 0;
+    background-color: rgba(125,127,130, .9);
+}
+
+*
+{
+    -moz-user-select: none;
+}
+
+html,
+body
+{
+    padding: 0;
+    margin: 0;
+}
+
+form, table, tr, td
+{
+    padding: 0;
+    margin: 0;
+}
+
+a,
+a:active,
+a:focus
+{
+    outline: none;
+}
+
+#container
+{
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#dialpad
+{
+    overflow: hidden;
+    position: relative;
+    padding: 30px 50px 30px 50px;
+}
+#dialpad-add-button,
+.dialpad-button-container
+{
+    z-index: 100;
+    position: absolute;
+    transition: 200ms ease;
+    transition-property: width, height, top, left, opacity, z-index;
+    cursor: default;
+    display: block;
+    padding: 12px;
+}
+
+#dialpad-add-button span
+{
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 6px;
+    box-shadow: inset 0 0 8px rgba(0,0,0,.3), 0 0 1px rgba(255,255,255,.6);
+    transition-property: opacity;
+    transition: 250ms ease;
+    background-color: rgb(126,127,130);
+    font-weight: bold;
+    font-family: sans-serif;
+}
+#dialpad-add-button span:after
+{
+    transition-property: opacity;
+    transition: 250ms ease;
+    content: "";
+    background-image: url("chrome://launchpad-mozest-org/skin/icons/add.svg");
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-color: transparent;
+    opacity: 0.5;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    z-index: 1;
+}
+#dialpad-add-button:hover span
+{
+    box-shadow: inset 0 0 8px rgba(0,0,0,.4), 0 0 1px rgba(255,255,255,.8);
+    background-color: rgb(123,124,127);
+}
+#dialpad-add-button:hover span:after
+{
+    opacity: 1;
+}
+
+#dialpad-add-button.active span
+{
+    box-shadow: inset 0 0 8px rgba(0,0,0,.3), 0 0 1px rgba(255,255,255,.6);
+    background-color: rgb(126,127,130);
+}
+#dialpad-add-button.active span:after
+{
+    opacity: .7;
+}
+
+.dialpad-button-container.dragged
+{
+    z-index: 1000;
+    transition-property: none;
+}
+
+.dialpad-button-background
+{
+    transition: 250ms ease;
+    transition-property: opacity;
+    opacity: 0;
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent;
+    -moz-border-top-colors:    rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(255,255,255,.5);
+    -moz-border-right-colors:  rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(255,255,255,.5);
+    -moz-border-bottom-colors: rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(255,255,255,.5);
+    -moz-border-left-colors:   rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(255,255,255,.5);
+    border-radius: 12px;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+}
+
+.dialpad-button-container:hover .dialpad-button-background
+{
+    opacity: 1;
+}
+
+.dialpad-button-link
+{
+    display: block;
+    background-color: transparent;
+    vertical-align: middle;
+    text-align: center;
+    border-radius: 6px;
+    box-shadow: 0 0 1px rgba(0,0,0,.5);
+    box-shadow: 0 1px 6px rgba(0,0,0,.5);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    cursor: default;
+}
+
+.dialpad-button-thumbnail
+{
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 28px;
+    background-color: rgb(255,255,255);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-origin: padding-box;
+    background-clip: padding-box;
+    background-image: url("chrome://launchpad-mozest-org/skin/icons/blank.png");
+    box-shadow: inset 0 0 64px rgba(0,0,0,.2);
+    image-rendering: auto;
+}
+
+.dialpad-button-container:hover .dialpad-button-thumbnail
+{
+}
+
+.dialpad-button-thumbnail img
+{
+    width: 100%;
+}
+
+.dialpad-button-title
+{
+    height: 28px;
+    line-height: 28px;
+    font-size: 100%;
+    background-color: #f9f9f9;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 28px;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    color: #333;
+    text-align: center;
+}
+
+.dialpad-button-remove-button
+{
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    background-color: transparent;
+    background-image: url("chrome://launchpad-mozest-org/skin/icons/close.png");
+    background-position: 0 0;
+    border: none;
+    display: none;
+}
+
+.dialpad-button-remove-button:hover
+{
+    background-position: -16px 0;
+}
+
+.dialpad-button-remove-button:active
+{
+    background-position: -32px 0;
+}
+
+.dialpad-button-container:hover .dialpad-button-remove-button
+{
+    display: block;
+}
+
+.dialpad-button-loading
+{
+    background-image: url("chrome://launchpad-mozest-org/skin/icons/loading.png");
+    background-repeat: no-repeat;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    left: 18px;
+    bottom: 18px;
+    display: none;
+}
+
+div.popup
+{
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,.5);
+    background-color: rgb(255,255,255);
+    padding: 10px;
+    position: absolute;
+    min-width: 40px;
+    z-index: 5000;
+    left: 0;
+    top: 0;
+}
+
+
+div.popup:after
+{
+    position: absolute;
+    display: inline-block;
+    content: '';
+}
+div.popup.right:after
+{
+    border-top: 10px solid transparent;
+    border-right: 10px solid rgb(255,255,255);
+    border-bottom: 10px solid transparent;
+    left: -10px;
+}
+
+div.popup.left:after
+{
+    border-top: 10px solid transparent;
+    border-left: 10px solid rgb(255,255,255);
+    border-bottom: 10px solid transparent;
+    right: -10px;
+}
+
+div.popup.bottom:after
+{
+    border-left: 10px solid transparent;
+    border-bottom: 10px solid rgb(255,255,255);
+    border-right: 10px solid transparent;
+    top: -10px;
+}
+
+div.popup.top:after
+{
+    border-left: 10px solid transparent;
+    border-top: 10px solid rgb(255,255,255);
+    border-right: 10px solid transparent;
+    bottom: -10px;
+}
+
+#settings-button
+{
+    width: 16px;
+    height: 16px;
+    position: fixed;
+    right: 20px;
+    top: 10px;
+    background-color: transparent;
+    background-image: url("chrome://launchpad-mozest-org/skin/icons/settings.png");
+    background-position: 0 0;
+    border: none;
+    opacity: 0.5;
+}
+
+#settings-button.active
+{
+    opacity: 0.75;
+}
+
+#settings-button:active
+{
+    opacity: 1;
+}
+
+.panel,
+#settings-panel
+{
+    position: fixed;
+    transition: 2000ms ease;
+    padding: 20px;
+    transition-property: opacity, visibility;
+    font-size: 109%;
+    line-height: 134%;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0ms ease 200ms, opacity 200ms ease;
+}
+
+#settings-panel
+{
+    width: 460px;
+    margin-top: 10px;
+}
+
+.panel.active,
+#settings-panel.active
+{
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0ms;
+}
+
+#settings-panel.popup:after
+{
+    right: 8px;
+}
+
+#settings-panel table
+{
+    width: 100%;
+}
+#settings-panel table td
+{
+    padding: 5px 0;
+}
+#settings-panel table td:first-child
+{
+    width: 40%;
+}
+#settings-panel select
+{
+    width: 100%;
+    font-size: 100%;
+    padding: 1px;
+}
+
+#settings-panel select option
+{
+}
+
+#settings-panel div.range-slider
+{
+    float: left;
+    width: 220px;
+}
+
+#settings-panel #zoom-percentage
+{
+    float: right;
+}
+
+div.range-slider
+{
+    height: 16px;
+    position: relative;
+    opacity: 0.5;
+}
+div.range-slider:not([readOnly="true"])
+{
+    opacity: 1;
+}
+div.range-slider div.track
+{
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+div.range-slider div.track span
+{
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    margin-top: -2px;
+    height: 2px;
+    box-shadow: 0 2px 1px rgba(255,255,255,.8);
+    box-shadow: inset 0 1px 2px rgb(153,153,153);
+    border-top-color: rgb(82,82,82);
+    border-left-color: rgb(82,82,82);
+    border-right-color: rgb(163,163,163);
+    border-bottom-color: rgb(163,163,163);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 4px;
+    display: block;
+}
+
+div.range-slider button.thumb
+{
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(109,109,109,1);
+    background-image: -moz-linear-gradient(top, rgba(242,242,242,1) 0%, rgba(175,175,175,1) 100%);
+    padding: 0;
+    margin: -6px 0 0 -6px;
+    top: 50%;
+}
+div.range-slider button.thumb span
+{
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 4px;
+    height: 4px;
+    border-radius: 2px;
+    background-image: -moz-linear-gradient(top, rgba(96,96,96,1) 0%, rgba(157,157,157,1) 100%);
+    box-shadow: 0 1px 1px rgba(255,255,255,.8);
+}
+div.range-slider:not([readOnly="true"]) button.thumb:active span
+{
+    background-image: -moz-linear-gradient(top, rgba(96,25,22,1) 0%, rgba(166,26,10,1) 100%);
+}
+
+div.range-slider div.scaleplate
+{
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+}
+
+div.range-slider div.scaleplate span
+{
+    width: 1px;
+    height: 4px;
+    position: absolute;
+    top: 0;
+    display: block;
+    background-color: #333;
+}
+
+div.range-slider div.scaleplate span:first-child,
+div.range-slider div.scaleplate span:last-child
+{
+    height: 2px;
+}
+
+/* retina */
+@media (min-resolution: 2dppx)
+{
+    .dialpad-button-remove-button
+    {
+        background-image: url("chrome://launchpad-mozest-org/skin/icons/close@2x.png");
+        background-position: 0 0;
+    }
+
+    .dialpad-button-remove-button:hover
+    {
+        background-position: -32px 0;
+    }
+
+    .dialpad-button-remove-button:active
+    {
+        background-position: -64px 0;
+    }
+
+    .dialpad-button-loading
+    {
+        background-image: url("chrome://launchpad-mozest-org/skin/icons/loading@2x.png");
+    }
+
+    .dialpad-button-thumbnail
+    {
+        background-image: url("chrome://launchpad-mozest-org/skin/icons/blank@2x.png");
+    }
+
+    #settings-button
+    {
+        background-image: url("chrome://launchpad-mozest-org/skin/icons/settings@2x.png");
+    }
+}
+
+.panel
+{
+    width: 400px;
+    padding: 20px !important;
+}
+
+.panel table
+{
+    width: 100%;
+}
+
+.panel tr
+{
+    display: -moz-box;
+    width: 100%;
+    margin-bottom: 1em;
+}
+
+.panel tr:last-child
+{
+    margin-top: 1em;
+    margin-bottom: 0;
+}
+
+
+.panel td:first-child
+{
+    -moz-box-flex: 1;
+}
+
+.panel td:last-child
+{
+    -moz-box-flex: 5000;
+    display: -moz-box;
+}
+
+.panel tr:last-child td
+{
+    display: block;
+    text-align: right;
+}
+
+.panel tr:last-child td button
+{
+    font-size: 100%;
+    padding: 2px 5px;
+    width: 90px;
+    line-height: 139%;
+    margin-left: 1em;
+}
+
+.panel input
+{
+    -moz-box-flex: 1;
+}
+
+

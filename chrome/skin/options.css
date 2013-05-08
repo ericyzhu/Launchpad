@@ -1,0 +1,110 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+:root
+{
+    -moz-user-select: none;
+}
+
+#logo
+{
+    margin-top: 20px;
+    margin-bottom: 16px;
+    height: 128px;
+    width: 128px;
+    background-image: url("chrome://launchpad-mozest-org/skin/icons/logo.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+label
+{
+    text-align: right;
+}
+
+#group
+{
+    width: 440px;
+    padding: 20px 20px 20px 20px;
+}
+
+#keystroke-recorder
+{
+    text-align: center;
+    font-size: 84%;
+    border-radius: 20px !important;
+    border: 1px solid rgba(0,0,0,.3);
+    background-color: rgb(255,255,255);
+    padding: 4px;
+    cursor: default !important;
+    -moz-appearance: none;
+    width: 280px;
+}
+
+#keystroke-recorder[focused="true"]
+{
+    border-color: rgba(0,0,0,.5);
+    box-shadow: 0 0 5px rgba(0,0,0,.5);
+}
+
+#keystroke-recorder-input
+{
+    border-radius: 10px;
+    text-align: center;
+    height: 0;
+    width: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    z-index: -10;
+    position: absolute;
+    -moz-appearance: none;
+    -moz-user-focus: ignore;
+}
+::-moz-placeholder
+{
+    color: #000;
+    font-size: 84%;
+}
+.setting-box
+{
+    position: relative;
+    width: 60%;
+}
+.input-clear-button
+{
+    opacity: .3;
+    width: 16px;
+    height: 16px;
+    border: 0;
+    padding: 0;
+    background: none;
+    -moz-appearance: none;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    margin-top: -8px;
+}
+.input-clear-button:hover
+{
+    opacity: .4;
+}
+.input-clear-button:active
+{
+    opacity: .5;
+}
+
+#spacer
+{
+    height: 2em;
+}
+
+/* retina */
+@media (min-resolution: 2dppx)
+{
+    #logo
+    {
+        background-image: url("chrome://launchpad-mozest-org/skin/icons/logo@2x.png");
+    }
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY st0 "fill:url(#SVGID_1_);">
+	<!ENTITY st1 "fill:url(#SVGID_2_);">
+	<!ENTITY st2 "opacity:0.3;">
+	<!ENTITY st3 "fill:#FFFFFF;">
+]>
+<svg version="1.1" id="add-icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="36px" height="36px" viewBox="0 0 36 36" xml:space="preserve">
+<g id="add-icon">
+	<g style="&st2;">
+		<polygon style="&st3;" points="14.614,34.5 14.614,22.326 2.5,22.326 2.5,15.614 14.614,15.614 14.614,3.5 21.387,3.5 
+			21.387,15.614 33.5,15.614 33.5,22.326 21.387,22.326 21.387,34.5 		"/>
+		<path style="&st3;" d="M20.887,4v11.114v1h1H33v5.712H21.887h-1v1V34h-5.771V22.826v-1h-1H3v-5.712h11.114h1v-1V4H20.887
+			 M21.887,3h-7.771v12.114H2v7.712h12.114V35h7.771V22.826H34v-7.712H21.887V3L21.887,3z"/>
+	</g>
+	<g>
+		<g>
+			
+				<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="-66.0005" y1="-22.4995" x2="-66.0005" y2="8.5" gradientTransform="matrix(1 0 0 -1 84 11)">
+				<stop  offset="0" style="stop-color:#4D4D4D"/>
+				<stop  offset="1" style="stop-color:#333333"/>
+			</linearGradient>
+			<polygon style="&st0;" points="14.614,33.5 14.614,21.326 2.5,21.326 2.5,14.614 14.614,14.614 14.614,2.5 21.387,2.5 
+				21.387,14.614 33.5,14.614 33.5,21.326 21.387,21.326 21.387,33.5 			"/>
+			<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="18.0005" y1="34" x2="18.0005" y2="2.0005">
+				<stop  offset="0" style="stop-color:#404040"/>
+				<stop  offset="1" style="stop-color:#262626"/>
+			</linearGradient>
+			<path style="&st1;" d="M20.887,3v11.114v1h1H33v5.712H21.887h-1v1V33h-5.771V21.826v-1h-1H3v-5.712h11.114h1v-1V3H20.887
+				 M21.887,2h-7.771v12.114H2v7.712h12.114V34h7.771V21.826H34v-7.712H21.887V2L21.887,2z"/>
+		</g>
+	</g>
+</g>
+</svg>

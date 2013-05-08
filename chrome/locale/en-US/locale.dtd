@@ -1,0 +1,20 @@
+<!ENTITY launchpad.WindowTitle "Launchpad">
+
+<!ENTITY settingsPanel.zoomMode.label     "Zoom: ">
+<!ENTITY settingsPanel.zoomMode.automatic "Automatic">
+<!ENTITY settingsPanel.zoomMode.manual    "Manual">
+<!ENTITY settingsPanel.zoomLevel.label    "Zoom Level: ">
+
+<!ENTITY input.address.label   "Address: ">
+<!ENTITY input.address.tooltip "Enter web address here">
+<!ENTITY input.title.label     "Title: ">
+<!ENTITY input.title.tooltip   "Enter a title for the website">
+<!ENTITY button.done.label     "OK">
+<!ENTITY button.cancel.label   "Cancel">
+
+<!ENTITY options.WindowTitle      "Perferences">
+<!ENTITY options.openLaunchpad    "Open Launchpad: ">
+<!ENTITY options.setAsHomepage    "Set Launchpad as homepage">
+<!ENTITY options.loadInNewtabPage "Load Launchpad in new tab page">
+
+

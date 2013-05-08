@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<!-- This Source Code is subject to the terms of the Mozilla Public License
+   - version 2.0 (the "License"). You can obtain a copy of the License at
+   - http://mozilla.org/MPL/2.0/. -->
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+    <Description about="urn:mozilla:install-manifest">
+        <em:id>launchpad@mozest.org</em:id>
+        <em:version>0.1</em:version>
+        <em:name>Launchpad</em:name>
+        <em:description>A seppd dial extension.</em:description>
+        <em:creator>Eric Y. Chu</em:creator>
+        <em:homepageURL>http://mozest.org/</em:homepageURL>
+        <em:type>2</em:type>
+        <em:bootstrap>true</em:bootstrap>
+        <em:unpack>true</em:unpack>
+        <em:optionsURL>chrome://launchpad-mozest-org/content/options.xul</em:optionsURL>
+        <em:optionsType>1</em:optionsType>
+        <em:iconURL>chrome://launchpad-mozest-org/skin/icons/icon.png</em:iconURL>
+        <em:icon64URL>chrome://launchpad-mozest-org/skin/icons/icon64.png</em:icon64URL>
+        <em:localized>
+            <Description>
+                <em:locale>en-US</em:locale>
+                <em:creator>Eric Y. Chu</em:creator>
+                <em:name>Launchpad</em:name>
+                <em:description>A seppd dial extension.</em:description>
+            </Description>
+        </em:localized>
+        <em:localized>
+            <Description>
+                <em:locale>zh-CN</em:locale>
+                <em:creator>Eric Y. Chu</em:creator>
+                <em:name>Launchpad</em:name>
+                <em:description>目前来说还只是个快速拨号扩展……</em:description>
+            </Description>
+        </em:localized>
+        <em:targetApplication>
+            <Description>
+                <!-- firefox -->
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>21.0</em:minVersion>
+                <em:maxVersion>24.0</em:maxVersion>
+            </Description>
+        </em:targetApplication>
+    </Description>
+</RDF>

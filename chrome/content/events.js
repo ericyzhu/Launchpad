@@ -61,8 +61,6 @@ Launchpad.events =
 {
 	disableEvent : function(e)
 	{
-		console.log('mousedown on button');
-
 		e.preventDefault();
 		e.stopPropagation();
 	},
@@ -114,6 +112,8 @@ Launchpad.events =
 
 			dragstart : function(e)
 			{
+				e.stopPropagation();
+
 				if ( ! this.dragState)
 				{
 					this.deltaX = e.pageX;
@@ -143,16 +143,18 @@ Launchpad.events =
 					dataTransfer.setData('text/x-moz-url', url + "\n" + title);
 					dataTransfer.setData('text/html', '<a href="' + url + '">' + title + "</a>");
 
-					//let dragElement = document.createElementNS(HTML_NAMESPACE, 'div');
-					//dataTransfer.setDragImage(this.dragGhost, 0, 0);
+					let dragGhost = document.createElementNS(HTML_NAMESPACE, 'div');
+					dataTransfer.setDragImage(dragGhost, 0, 0);
 				}
 			},
 
 			dragover : function(e)
 			{
+				e.preventDefault();
+				e.stopPropagation();
+
 				if (this.dragState)
 				{
-					this.dragElement.style.opacity = 0;
 
 					let buttonCurrent = Launchpad.button.current;
 					let {clientWidth, clientHeight} = document.documentElement;
@@ -203,7 +205,6 @@ Launchpad.events =
 				}
 				else
 				{
-					e.preventDefault();
 					if (getValidDataTransferDataTypes(e.dataTransfer.types).length)
 					{
 						e.dataTransfer.dropEffect = 'copy';
@@ -213,6 +214,9 @@ Launchpad.events =
 
 			dragleave : function(e)
 			{
+				e.preventDefault();
+				e.stopPropagation();
+
 				let {clientWidth, clientHeight} = document.documentElement;
 				let {clientX, clientY} = e;
 
@@ -229,6 +233,8 @@ Launchpad.events =
 			dragend : function(e)
 			{
 				e.preventDefault();
+				e.stopPropagation();
+
 				if (this.dragState)
 				{
 					this.dragElement.style.opacity = 1;

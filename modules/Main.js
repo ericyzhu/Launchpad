@@ -106,7 +106,7 @@ function removeButton(aDocument, aButton)
 	aButton.parentNode.removeChild(aButton);
 }
 
-Storage.openConnection(FileUtils.getDataFile(['database.sqlite']),
+Storage.openConnection(FileUtils.getDataFile(['database.sqlite'], true),
 {
 	onSuccess : function(aConnection)
 	{
@@ -198,17 +198,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		mainWindowContent : null,
 		windowStage : null,
 		isBlankPage : null,
-		resize : function()
-		{
-			let {x, y, width, height} = this.mainWindowContent.boxObject;
-
-			this.browser.style.width   = width + 'px';
-			this.browser.style.height  = height + 'px';
-			this.window.style.width    = width + 'px';
-			this.window.style.height   = height + 'px';
-			this.window.style.top      = y + 'px';
-			this.window.style.left     = x + 'px';
-		},
+		resize : null,
 		_open : function()
 		{
 			this.resize();
@@ -272,17 +262,30 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			this.window.appendChild(this.browser);
 			this.mainWindowContent.appendChild(this.window);
 
+			this.resize = function()
+			{
+				let {x, y, width, height} = this.mainWindowContent.boxObject;
+
+				this.browser.style.width   = width + 'px';
+				this.browser.style.height  = height + 'px';
+				this.window.style.width    = width + 'px';
+				this.window.style.height   = height + 'px';
+				this.window.style.top      = y + 'px';
+				this.window.style.left     = x + 'px';
+			}.bind(this);
+
 			this.resize();
-			aWindow.addEventListener('resize', this.resize.bind(this), false);
+			aWindow.addEventListener('resize', this.resize, false);
 			aWindow.ToggleLaunchpadWindow = this.toggle.bind(this);
 
 			return this;
 		},
 		uninit : function()
 		{
-			aWindow.removeEventListener('resize', this.resize.bind(this));
+			aWindow.removeEventListener('resize', this.resize, false);
 			delete aWindow.ToggleLaunchpadWindow;
 			this.window.parentNode.removeChild(this.window);
+			this.resize = null;
 		}
 	}.init();
 
@@ -422,24 +425,27 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	// gBrowser listener
 	let gBrowserListener =
 	{
-		_listener : function(aEvent)
-		{
-			let window = aEvent.originalTarget.defaultView;
-
-			if (window == gBrowser.selectedTab.linkedBrowser.contentWindow && window.location.href == 'about:blank')
-			{
-				launchpadWindow.toggle(true, true);
-			}
-		},
+		_listener : null,
 		init : function()
 		{
+			this._listener = function(aEvent)
+			{
+				let window = aEvent.originalTarget.defaultView;
+
+				if (window == gBrowser.selectedTab.linkedBrowser.contentWindow && window.location.href == 'about:blank')
+				{
+					launchpadWindow.toggle(true, true);
+				}
+			}.bind(this);
+
 			gBrowser.addEventListener('load', this._listener, true);
 
 			return this;
 		},
 		uninit : function()
 		{
-			gBrowser.removeEventListener('load', this._listener);
+			gBrowser.removeEventListener('load', this._listener, true);
+			this._listener = null;
 		}
 	}.init();
 
@@ -448,14 +454,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	{
 		keyset : null,
 		key : null,
-		_listener : function(aName)
-		{
-			if (aName == 'openLaunchdShortcut')
-			{
-				this._reset();
-
-			}
-		},
+		_listener : null,
 		_reset : function()
 		{
 			let keyModifiers = [];
@@ -498,17 +497,23 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		},
 		init : function()
 		{
-			PrefListener.add(this._listener.bind(this));
+			this._listener = function(aName)
+			{
+				aName == 'openLaunchdShortcut' && this._reset();
+			}.bind(this);
+
+			PrefListener.add(this._listener);
 			this._reset();
 			return this;
 		},
 		uninit : function()
 		{
-			PrefListener.remove(this._listener.bind(this));
+			PrefListener.remove(this._listener);
 			try
 			{
 				this.keyset.parentNode.removeChild(this.keyset);
 			} catch (e) {}
+			this._listener = null;
 		}
 	}.init();
 

@@ -106,5 +106,6 @@ label
     #logo
     {
         background-image: url("chrome://launchpad-mozest-org/skin/icons/logo@2x.png");
+        background-size: 128px;
     }
 }

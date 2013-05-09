@@ -443,6 +443,14 @@ function init()
 	onShutdown.add(function()
 	{
 		bookmarksService.removeObserver(observer);
+		observerHandlers =
+		{
+			added   : [],
+			removed : [],
+			moved   : [],
+			changed : [],
+			batchUpdated : []
+		};
 	});
 }
 

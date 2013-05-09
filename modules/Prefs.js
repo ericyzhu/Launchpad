@@ -214,7 +214,7 @@ function init()
 
 			let value = aDefaultValue;
 
-			if (branchPrefType == 'invalid' || branchPrefType != (defaultPrefType == 'number' || defaultPrefType == 'object' ? 'string' : defaultPrefType))
+			if (branchPrefType == 'invalid' || branchPrefType != ((defaultPrefType == 'number' || defaultPrefType == 'object') ? 'string' : defaultPrefType))
 			{
 				try
 				{
@@ -294,7 +294,7 @@ function init()
 			});
 		}
 	};
-	Services.scriptloader.loadSubScript(ROOT_PATH_URI + 'defaults/preferences/launchpad.js', scope);
+	Services.scriptloader.loadSubScript(ROOT_PATH_URI + 'defaults/preferences.js', scope);
 	observer.register();
 	onShutdown.add(uninstallHandler, 'uninstall');
 	onShutdown.add(disableHandler, 'disable');

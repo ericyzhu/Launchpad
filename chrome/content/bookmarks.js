@@ -226,20 +226,17 @@ Launchpad.bookmarks = (function()
 		{
 			let oldOrderIndex = object.getIndexByBookmarkIndex(aOldIndex);
 			let newOrderIndex = object.getIndexByBookmarkIndex(aNewIndex);
+			let IDForNewOrderIndex = object[newOrderIndex].id;
 
-			if (oldOrderIndex >= 0 && newOrderIndex >= 0 && object[newOrderIndex].id != aID)
+			if (IDForNewOrderIndex != aID)
 			{
 				object.swap(oldOrderIndex, newOrderIndex, function()
 				{
 					for (let i = 0; i < listeners.moved.length; i++)
 					{
-						listeners.moved[i](aID, aOldFolderID, aOldIndex, aNewFolderID, aNewIndex, aType);
+						listeners.moved[i](aID, oldOrderIndex, IDForNewOrderIndex, newOrderIndex);
 					}
 				});
-			}
-			else
-			{
-				batchUpdated();
 			}
 		}
 		else if (aOldFolderID == folderID && aNewFolderID != folderID)

@@ -11,6 +11,7 @@ Launchpad.button =
 	fragment : null,
 	preset : null,
 	current : null,
+	elements : [],
 
 	initPreset : function()
 	{
@@ -46,8 +47,6 @@ Launchpad.button =
 		this.preset.maxWidth  = Prefs.dialpadButtonThumbnailWidthDefault * Prefs.dialpadButtonRatioMax;
 		this.preset.maxHeight = Math.round(this.preset.maxWidth * Prefs.dialpadButtonThumbnailHeightRatio + Prefs.dialpadButtonTitleHeight + this.preset.paddingHeight);
 		this.preset.maxWidth  = Math.round(this.preset.maxWidth + this.preset.paddingWidth);
-
-
 	},
 
 	resetCurrent : function()
@@ -300,6 +299,8 @@ Launchpad.button =
 		aCanDrag && this.bindEvent(button);
 
 		Launchpad.dialpad.element.appendChild(node);
+
+		this.elements[aID] = button;
 	},
 
 	bindEvent : function(aElement)
@@ -526,10 +527,6 @@ Launchpad.button =
 		return document.getElementById(DIALPAD_BUTTON_ID_PREFIX + aID) ? true : false;
 	},
 
-	edit : function()
-	{
-	},
-
 	contextmenuCommand : function(aEvent, aMenuID, aOID)
 	{
 		aMenuID = aMenuID.substr('launchpad-edit-menu-'.length)
@@ -589,10 +586,9 @@ Launchpad.button =
 			Launchpad.popup.hide();
 		}.bind(this);
 
-		let bookmarkMoved = function(aID, aOldFolderID, aOldIndex, aNewFolderID, aNewIndex, aType)
+		let bookmarkMoved = function(aIDForOldOrderIndex, aOldOrderIndex, aIDForNewOrderIndex, aNewOrderIndex)
 		{
-			this.resetCurrent();
-			this.renderAll();
+			Launchpad.button.resetPosition(aOldOrderIndex, aNewOrderIndex);
 			Launchpad.popup.hide();
 		}.bind(this);
 

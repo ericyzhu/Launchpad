@@ -217,6 +217,8 @@ input
     background-color: transparent;
     background-image: url("chrome://launchpad-mozest-org/skin/icons/close.png");
     background-position: 0 0;
+    background-size: 48px 16px;
+    background-repeat: no-repeat;
     border: none;
     display: none;
 }
@@ -240,6 +242,7 @@ input
 {
     background-image: url("chrome://launchpad-mozest-org/skin/icons/loading.png");
     background-repeat: no-repeat;
+    background-size: 16px;
     width: 16px;
     height: 16px;
     position: absolute;
@@ -310,6 +313,8 @@ div.popup.top:after
     background-color: transparent;
     background-image: url("chrome://launchpad-mozest-org/skin/icons/settings.png");
     background-position: 0 0;
+    background-size: 16px;
+    background-repeat: no-repeat;
     border: none;
     opacity: 0.5;
 }
@@ -492,12 +497,12 @@ div.range-slider div.scaleplate span:last-child
 
     .dialpad-button-remove-button:hover
     {
-        background-position: -32px 0;
+        background-position: -16px 0;
     }
 
     .dialpad-button-remove-button:active
     {
-        background-position: -64px 0;
+        background-position: -32px 0;
     }
 
     .dialpad-button-loading
@@ -513,6 +518,15 @@ div.range-slider div.scaleplate span:last-child
     #settings-button
     {
         background-image: url("chrome://launchpad-mozest-org/skin/icons/settings@2x.png");
+    }
+
+    .dialpad-button-background
+    {
+        border-width: 14px;
+        -moz-border-top-colors:    rgba(0,0,0,.3) rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(0,0,0,.36) rgba(255,255,255,.5) rgba(255,255,255,.5);
+        -moz-border-right-colors:  rgba(0,0,0,.3) rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(0,0,0,.36) rgba(255,255,255,.5) rgba(255,255,255,.5);
+        -moz-border-bottom-colors: rgba(0,0,0,.3) rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(0,0,0,.36) rgba(255,255,255,.5) rgba(255,255,255,.5);
+        -moz-border-left-colors:   rgba(0,0,0,.3) rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(0,0,0,.36) rgba(255,255,255,.5) rgba(255,255,255,.5);
     }
 }
 

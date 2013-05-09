@@ -15,6 +15,11 @@
     {
         list-style-image: url("chrome://launchpad-mozest-org/skin/icons/toolbar-button@2x.png") !important;
     }
+
+    #launchpad-mozest-org-toolbar-button > .toolbarbutton-icon
+    {
+        width: 16px;
+    }
 }
 
 #launchpad-mozest-org-window

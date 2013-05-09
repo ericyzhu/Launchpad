@@ -63,6 +63,67 @@ function init()
 		}
 	})();
 
+	let gNavToolboxAttrListener =
+	{
+		_listeners : null,
+		_listener : null,
+		add : function(aAttrName, aCallback)
+		{
+			if ( ! this._listeners[aAttrName])
+			{
+				this._listeners[aAttrName] = [];
+			}
+
+			if (this._listeners[aAttrName].indexOf(aCallback) < 0)
+			{
+				this._listeners[aAttrName].push(aCallback);
+			}
+		},
+		remove : function(aAttrName, aCallback)
+		{
+			if (this._listeners[aAttrName])
+			{
+				let index = this._listeners[aAttrName].indexOf(aCallback);
+				if (index >= 0)
+				{
+					this._listeners[aAttrName].splice(index, 1);
+				}
+
+				if ( ! this._listeners[aAttrName].length)
+				{
+					delete this._listeners[aAttrName];
+				}
+			}
+		},
+		init : function()
+		{
+			this._listener = function(aEvent)
+			{
+				let callbacks = this._listeners[aEvent.attrName];
+
+				if (callbacks)
+				{
+					let {prevValue, newValue} = aEvent;
+
+					for (let i = 0; i < callbacks.length; i++)
+					{
+						callbacks[i](mainWindow.gNavToolbox, prevValue, newValue);
+					}
+				}
+			}.bind(this);
+			this._listeners = {};
+			mainWindow.gNavToolbox.addEventListener('DOMAttrModified', this._listener, false);
+			return this;
+		},
+		uninit : function()
+		{
+			mainWindow.gNavToolbox.removeEventListener('DOMAttrModified', this._listener, false);
+			this._listeners = {};
+			this._listener = null;
+		}
+	}.init();
+	window.addEventListener('beforeunload', function() gNavToolboxAttrListener.uninit(), false);
+
 	document.addEventListener('contextmenu', Launchpad.events.disableEvent, false);
 
 	Launchpad.bookmarks.load(Prefs.bookmarksFolderID);
@@ -383,10 +444,9 @@ function init()
 		let panel = document.getElementById('settings-panel');
 		button.addEventListener('click', function(e)
 		{
-			e.preventDefault();
-			e.stopPropagation();
 			e.button == 0 && Launchpad.popup.show(panel, button);
-		}, false);
+		}, true);
+		button.addEventListener('mousedown', Launchpad.events.disableEvent, true);
 
 		let zoomMode = document.getElementById('zoom-mode');
 		let zoomAdjuster = document.getElementById('zoom-adjuster');
@@ -426,6 +486,24 @@ function init()
 					break;
 			}
 		}
+
+		let TabsBar = mainWindow.document.getElementById('TabsToolbar');
+		let ToolbarMenu = mainWindow.document.getElementById('toolbar-menubar');
+		function getToolbarHeight()
+		{
+			return TabsBar.boxObject.height + ToolbarMenu.boxObject.height;
+		}
+		let buttonTop = getStyle(button, 'top');
+		gNavToolboxAttrListener.add('style', function(gNavToolbox, aPrevValue, aNewValue)
+		{
+			if (aNewValue.indexOf('position') >= 0 || aNewValue.indexOf('height') >= 0)
+			{
+				gNavToolbox.style.zIndex = 1;
+				let {top, bottom} = gNavToolbox.getBoundingClientRect();
+				button.style.top = (buttonTop + (bottom - top - getToolbarHeight())) + 'px';
+				panel.classList.contains('active') && Launchpad.popup.show(panel, button);
+			}
+		});
 	})();
 
 	// add bookmark panel
@@ -433,7 +511,7 @@ function init()
 	{
 		let panel = document.getElementById('add-bookmark-panel');
 		let form = panel.querySelector('form');
-		let input = form.querySelector('input');
+		let uriControl = form.querySelector('input');
 
 		form.querySelector('button[type="reset"]').addEventListener('click', function(e)
 		{
@@ -447,7 +525,7 @@ function init()
 			e.preventDefault();
 			e.stopPropagation();
 
-			let uri = input.value.trim();
+			let uri = uriControl.value.trim();
 
 			if (uri)
 			{

@@ -61,8 +61,10 @@ Launchpad.events =
 {
 	disableEvent : function(e)
 	{
-		e.stopPropagation();
+		console.log('mousedown on button');
+
 		e.preventDefault();
+		e.stopPropagation();
 	},
 
 	dialButtonEvents :
@@ -84,6 +86,11 @@ Launchpad.events =
 					mainWindow.ToggleLaunchpadBox(false);
 				}
 			}
+		},
+
+		mousedown : function(e)
+		{
+			e.stopPropagation();
 		},
 
 		contextmenu : function(e)
@@ -280,6 +287,12 @@ Launchpad.events =
 			uriControl.focus();
 			uriControl.select();
 			Launchpad.popup.show(panel, e.currentTarget);
+		},
+
+		mousedown : function(e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
 		},
 
 		dragdrop :

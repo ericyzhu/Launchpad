@@ -310,9 +310,10 @@ Launchpad.button =
 		link.addEventListener('click', events.click, true);
 		link.addEventListener('mouseup', events.mouseup, true);
 
+		aElement.addEventListener('mousedown', events.mousedown, false);
 		aElement.setAttribute('draggable', true);
 		aElement.addEventListener('contextmenu', events.contextmenu, false);
-		aElement.addEventListener('dragstart', events.dragdrop.dragstart.bind(events.dragdrop), false);
+		aElement.addEventListener('dragstart', events.dragdrop.dragstart.bind(events.dragdrop), true);
 		aElement.addEventListener('dragover', events.dragdrop.dragover.bind(events.dragdrop), false);
 		aElement.addEventListener('dragleave', events.dragdrop.dragleave.bind(events.dragdrop), false);
 		aElement.addEventListener('dragend', events.dragdrop.dragend.bind(events.dragdrop), false);
@@ -347,6 +348,7 @@ Launchpad.button =
 		button.style.top    = position.y + 'px';
 		button.style.width  = innerWidth  + 'px';
 		button.style.height = innerHeight + 'px';
+		button.addEventListener('mousedown', events.mousedown, true);
 		button.addEventListener('dragenter', events.dragdrop.dragenter, false);
 		button.addEventListener('dragover', events.dragdrop.dragover, false);
 		button.addEventListener('drop', events.dragdrop.drop, false);

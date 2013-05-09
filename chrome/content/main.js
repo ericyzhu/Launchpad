@@ -100,7 +100,7 @@ function init()
 
 	mainWindow.addEventListener('keydown', closeLaunchpad, false);
 	window.addEventListener('beforeunload', function(e) mainWindow.removeEventListener('keydown', closeLaunchpad), false);
-	window.addEventListener('click', closeLaunchpad, false);
+	window.addEventListener('mousedown', closeLaunchpad, false);
 
 	function closeLaunchpad(aEvent, aEscKey)
 	{
@@ -112,7 +112,7 @@ function init()
 				if (aEvent.keyCode != 27) return;
 				break;
 
-			case 'click':
+			case 'mousedown':
 				if (aEvent.button != 0) return;
 				break;
 
@@ -131,7 +131,7 @@ function init()
 			{
 				popupOpened = true;
 
-				if (eventType == 'click')
+				if (eventType == 'mousedown')
 				{
 					let {clientX, clientY} = aEvent;
 					let {left, top, right, bottom} = popup.getBoundingClientRect()

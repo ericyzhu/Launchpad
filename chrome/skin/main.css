@@ -35,6 +35,11 @@ a:focus
     outline: none;
 }
 
+input
+{
+    -moz-user-select: text;
+}
+
 #container
 {
     position: relative;

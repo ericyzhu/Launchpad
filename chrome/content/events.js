@@ -26,6 +26,12 @@ let getValidDataTransferDataTypes = function(aTypes)
 let buttonDropdEventHandler = function(aEvent, aCallback)
 {
 	let dataTransfer = aEvent.dataTransfer;
+
+	if ( ! dataTransfer)
+	{
+		return;
+	}
+
 	let types = getValidDataTransferDataTypes(dataTransfer.types);
 	if ( ! types.length)
 	{
@@ -79,7 +85,7 @@ Launchpad.events =
 			{
 				let uri = e.currentTarget.uri;
 				mainWindow.openLinkIn(uri, e.button == 1 ? 'tab' : 'current', {relatedToCurrent : false});
-				if (e.button == 0)
+				if (e.button == 0 && mainWindow.ToggleLaunchpadBox)
 				{
 					mainWindow.ToggleLaunchpadBox(false);
 				}

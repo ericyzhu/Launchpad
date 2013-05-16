@@ -9,7 +9,6 @@
 let {Services, atob, btoa} = Cu.import('resource://gre/modules/Services.jsm', null);
 
 let HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
-let hiddenDOMWindow = Services.appShell.hiddenDOMWindow;
 let queue = [];
 
 exports.Snapshot =
@@ -130,16 +129,29 @@ exports.Snapshot =
 			return;
 		}
 
-		let capture = function()
+		let capture = function capture()
 		{
+			let browserWindow = Services.wm.getMostRecentWindow("navigator:browser").QueryInterface(Ci.nsIDOMWindow);
+			let browserDocument = browserWindow.document;
+			let mainWindow = browserDocument.getElementById('main-window');
+			let hiddenWindow = browserDocument.getElementById('launchpad-mozest-org-hidden-window');
+
 			let [uri, callbacks] = queue[0];
 			let timer;
-			let browser = hiddenDOMWindow.document.createElement('browser');
+			let browser = browserDocument.createElement('browser');
 			browser.width = this.DEFAULT_WIDTH;
 			browser.height = this.DEFAULT_HEIGHT;
 			browser.setAttribute('type', 'content');
 			browser.setAttribute('disablehistory', true);
-			hiddenDOMWindow.document.documentElement.appendChild(browser);
+			hiddenWindow.appendChild(browser);
+
+			let continueQueue = function()
+			{
+				(queue.length > 0) && browserWindow.setTimeout(function()
+				{
+					capture.bind(this)();
+				}.bind(this), 1000);
+			}.bind(this);
 
 			let cleanAndContinue = function()
 			{
@@ -147,13 +159,13 @@ exports.Snapshot =
 				browser.parentNode.removeChild(browser);
 				queue.splice(0, 1);
 				continueQueue();
-			}
+			}.bind(this);
 
 			let stopTimer = function()
 			{
 				if (timer)
 				{
-					hiddenDOMWindow.clearTimeout(timer);
+					browserWindow.clearTimeout(timer);
 				}
 			}
 
@@ -200,7 +212,7 @@ exports.Snapshot =
 			browser.addEventListener('load', onload, true);
 			browser.setAttribute('src', uri);
 
-			timer = hiddenDOMWindow.setTimeout(function()
+			timer = browserWindow.setTimeout(function()
 			{
 				stopTimer();
 				for (let i = 0; i < callbacks.length; i++)
@@ -209,13 +221,7 @@ exports.Snapshot =
 				}
 				cleanAndContinue();
 			}.bind(this), this.CAPTURE_TIMEOUT);
-
 		}.bind(this);
-
-		function continueQueue()
-		{
-			(queue.length > 0) && hiddenDOMWindow.setTimeout(function() capture(), 1000);
-		}
 
 		queue.push([aURI, [aCallback]]);
 		capture();
@@ -236,9 +242,9 @@ exports.Snapshot =
 		context.restore();
 
 		let dataURL = aCanvas.toDataURL(this.CONTENT_TYPE);
-		let regexp = new RegExp('data:' + this.CONTENT_TYPE + ';base64,');
+		let pattern = new RegExp('data:' + this.CONTENT_TYPE + ';base64,');
 
-		return atob(dataURL.replace(regexp, ''));
+		return atob(dataURL.replace(pattern, ''));
 	},
 
 	determineCropSize : function(aWindow, aCanvas)

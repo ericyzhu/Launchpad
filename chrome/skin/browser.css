@@ -45,3 +45,9 @@
     background-color: transparent;
 }
 
+#launchpad-mozest-org-hidden-window
+{
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}

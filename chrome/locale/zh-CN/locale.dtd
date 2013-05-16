@@ -1,20 +1,31 @@
 <!ENTITY launchpad.WindowTitle "Launchpad">
 
-<!ENTITY settingsPanel.zoomMode.label     "缩放：">
-<!ENTITY settingsPanel.zoomMode.automatic "自动">
-<!ENTITY settingsPanel.zoomMode.manual    "手动">
-<!ENTITY settingsPanel.zoomLevel.label    "缩放级别：">
+<!ENTITY panelSettings.zoomMode.label     "缩放：">
+<!ENTITY panelSettings.zoomMode.automatic "自动">
+<!ENTITY panelSettings.zoomMode.manual    "手动">
+<!ENTITY panelSettings.zoomLevel.label    "缩放级别：">
 
-<!ENTITY input.address.label   "地址：">
-<!ENTITY input.address.tooltip "在此输入网页地址">
-<!ENTITY input.title.label     "名称：">
-<!ENTITY input.title.tooltip   "请输入网站名称">
-<!ENTITY button.done.label     "完成">
-<!ENTITY button.cancel.label   "取消">
+<!ENTITY panelEditItem.address.label   "地址：">
+<!ENTITY panelEditItem.address.tooltip "在此输入网页地址">
+<!ENTITY panelEditItem.title.label     "名称：">
+<!ENTITY panelEditItem.title.tooltip   "请输入网站名称">
+
+<!ENTITY button.done.label   "完成">
+<!ENTITY button.cancel.label "取消">
+
+<!ENTITY popupEditItem.remove      "移除">
+<!ENTITY popupEditItem.edit        "编辑…">
+<!ENTITY popupEditItem.reload      "重新载入">
+<!ENTITY popupEditItem.reloadEvery "自动重新载入">
+<!ENTITY popupEditItem.30minutes   "三十分钟">
+<!ENTITY popupEditItem.1hour       "一小时">
+<!ENTITY popupEditItem.2hours      "两小时">
+<!ENTITY popupEditItem.6hours      "六小时">
+<!ENTITY popupEditItem.custom      "自定义…">
+<!ENTITY popupEditItem.never       "永不">
+<!ENTITY popupEditItem.pageDefault "网页默认">
 
 <!ENTITY options.WindowTitle      "偏好设置">
 <!ENTITY options.openLaunchpad    "打开 Launchpad：">
-<!ENTITY options.setAsHomepage    "将 Launchpad 设为首页">
+<!ENTITY options.setAsHomepage    "将 Launchpad 设为主页">
 <!ENTITY options.loadInNewtabPage "在新建标签页中载入 Launchpad">
-
-

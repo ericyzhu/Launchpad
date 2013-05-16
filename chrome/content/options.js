@@ -21,7 +21,6 @@ const OS = Services.appinfo.OS;
 	let originalKeystrokeRecorderValue = '';
 	keystrokeRecorder.placeholder = locale.clickToRecordShortcut;
 
-
 	let modifiers = [];
 	let keycode;
 	let pressedKeys = [];
@@ -125,6 +124,17 @@ const OS = Services.appinfo.OS;
 
 	PrefListener.add(listener);
 	window.addEventListener('unload', function(e) PrefListener.remove(listener), false);
+
+	window.addEventListener('load', function(e)
+	{
+		window.setTimeout(function()
+		{
+			keystrokeRecorder.blur();
+			keystrokeRecorderInput.blur();
+
+		}, 10);
+	}, false);
+
 
 	function listener(aName, aValue)
 	{

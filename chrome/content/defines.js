@@ -31,5 +31,8 @@ const DIALPAD_BUTTON_THUMBNAIL_CLASS = 'dialpad-button-thumbnail';
 const DIALPAD_BUTTON_TITLE_CLASS = 'dialpad-button-title';
 const DIALPAD_BUTTON_REMOVE_BUTTON_CLASS = 'dialpad-button-remove-button';
 const DIALPAD_BUTTON_LOADING_CLASS = 'dialpad-button-loading';
+const SUPPORTED_DATATRANSFER_DATA_TYPES = ['text/x-moz-url', 'text/x-moz-text-internal'];
 
+let scrollbox;
 let Launchpad = {};
+

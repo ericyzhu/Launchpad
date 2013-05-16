@@ -1,20 +1,31 @@
 <!ENTITY launchpad.WindowTitle "Launchpad">
 
-<!ENTITY settingsPanel.zoomMode.label     "Zoom: ">
-<!ENTITY settingsPanel.zoomMode.automatic "Automatic">
-<!ENTITY settingsPanel.zoomMode.manual    "Manual">
-<!ENTITY settingsPanel.zoomLevel.label    "Zoom Level: ">
+<!ENTITY panelSettings.zoomMode.label     "Zoom: ">
+<!ENTITY panelSettings.zoomMode.automatic "Automatic">
+<!ENTITY panelSettings.zoomMode.manual    "Manual">
+<!ENTITY panelSettings.zoomLevel.label    "Zoom Level: ">
 
-<!ENTITY input.address.label   "Address: ">
-<!ENTITY input.address.tooltip "Enter web address here">
-<!ENTITY input.title.label     "Title: ">
-<!ENTITY input.title.tooltip   "Enter a title for the website">
-<!ENTITY button.done.label     "OK">
-<!ENTITY button.cancel.label   "Cancel">
+<!ENTITY panelEditItem.address.label   "Address: ">
+<!ENTITY panelEditItem.address.tooltip "Enter web address here">
+<!ENTITY panelEditItem.title.label     "Title: ">
+<!ENTITY panelEditItem.title.tooltip   "Enter a title for the website">
+
+<!ENTITY button.done.label   "OK">
+<!ENTITY button.cancel.label "Cancel">
+
+<!ENTITY popupEditItem.remove      "Remove">
+<!ENTITY popupEditItem.edit        "Edit…">
+<!ENTITY popupEditItem.reload      "Reload">
+<!ENTITY popupEditItem.reloadEvery "Reload Every">
+<!ENTITY popupEditItem.30minutes   "30 Minutes">
+<!ENTITY popupEditItem.1hour       "1 Hour">
+<!ENTITY popupEditItem.2hours      "2 Hours">
+<!ENTITY popupEditItem.6hours      "6 Hours">
+<!ENTITY popupEditItem.custom      "Custom…">
+<!ENTITY popupEditItem.never       "Never">
+<!ENTITY popupEditItem.pageDefault "Page Default">
 
 <!ENTITY options.WindowTitle      "Perferences">
 <!ENTITY options.openLaunchpad    "Open Launchpad: ">
 <!ENTITY options.setAsHomepage    "Set Launchpad as homepage">
 <!ENTITY options.loadInNewtabPage "Load Launchpad in new tab page">
-
-

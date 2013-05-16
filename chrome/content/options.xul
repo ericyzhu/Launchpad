@@ -6,7 +6,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://launchpad-mozest-org/skin/options.css" type="text/css"?>
-<!DOCTYPE window [
+<!DOCTYPE prefwindow [
     <!ENTITY % launchpadDTD SYSTEM "chrome://launchpad-mozest-org/locale/locale.dtd">
     %launchpadDTD;
 ]>
@@ -14,46 +14,45 @@
             xmlns:html="http://www.w3.org/1999/xhtml"
             id="preferences-window"
             title="&options.WindowTitle;"
-            windowtype="launchpad-mozest-org:options"
-            buttons="accept, cancel">
-    <preferences>
-        <preference id="pref-set-as-homepage" name="extensions.launchpad-mozest-org.setAsHomepage" type="bool"/>
-        <preference id="pref-load-in-newtab-page" name="extensions.launchpad-mozest-org.loadInNewtabPage" type="bool"/>
-    </preferences>
+            windowtype="launchpad-mozest-org:options">
     <prefpane>
+        <preferences>
+            <preference id="pref-set-as-homepage" name="extensions.launchpad-mozest-org.setAsHomepage" type="bool"/>
+            <preference id="pref-load-in-newtab-page" name="extensions.launchpad-mozest-org.loadInNewtabPage" type="bool"/>
+        </preferences>
         <vbox pack="center">
             <box pack="center" id="logo"/>
             <hbox pack="center">
-                    <grid id="group">
-                        <columns>
-                            <column flex="1"/>
-                        </columns>
-                        <rows>
-                            <row>
-                                <label control="keystroke-recorder" value="&options.openLaunchpad;"/>
-                                <box class="setting-box">
-                                    <html:input id="keystroke-recorder"/>
-                                    <html:input id="keystroke-recorder-input"/>
-                                    <html:img id="clear-shortcut" class="input-clear-button" width="16" height="16" src="chrome://launchpad-mozest-org/skin/icons/clear.svg"/>
-                                </box>
-                            </row>
-                            <row>
-                                <spacer id="spacer"/>
-                            </row>
-                            <row>
-                                <spacer/>
-                                <box class="setting-box">
-                                    <checkbox id="set-as-homepage" label="&options.setAsHomepage;" preference="pref-set-as-homepage"/>
-                                </box>
-                            </row>
-                            <row>
-                                <spacer/>
-                                <box class="setting-box">
-                                    <checkbox id="load-in-newtab-page" label="&options.loadInNewtabPage;" preference="pref-load-in-newtab-page"/>
-                                </box>
-                            </row>
-                        </rows>
-                    </grid>
+                <grid id="group">
+                    <columns>
+                        <column flex="1"/>
+                    </columns>
+                    <rows>
+                        <row align="center">
+                            <label control="keystroke-recorder" value="&options.openLaunchpad;"/>
+                            <box class="setting-box">
+                                <html:input id="keystroke-recorder"/>
+                                <html:input id="keystroke-recorder-input"/>
+                                <html:img id="clear-shortcut" class="input-clear-button" width="16" height="16" src="chrome://launchpad-mozest-org/skin/icons/clear.svg"/>
+                            </box>
+                        </row>
+                        <row>
+                            <spacer id="spacer"/>
+                        </row>
+                        <row align="center">
+                            <spacer/>
+                            <box class="setting-box">
+                                <checkbox id="set-as-homepage" label="&options.setAsHomepage;" preference="pref-set-as-homepage"/>
+                            </box>
+                        </row>
+                        <row align="center">
+                            <spacer/>
+                            <box class="setting-box">
+                                <checkbox id="load-in-newtab-page" label="&options.loadInNewtabPage;" preference="pref-load-in-newtab-page"/>
+                            </box>
+                        </row>
+                    </rows>
+                </grid>
             </hbox>
         </vbox>
     </prefpane>

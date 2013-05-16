@@ -120,7 +120,7 @@ function startup(aData, aReason)
 		addonData.NAME     = aAddon.name;
 	});
 	addonData.PACKAGE_NAME     = 'launchpad-mozest-org';
-	addonData.MAIN_WIN_URI     = 'chrome://launchpad-mozest-org/content/main.xhtml';
+	addonData.MAIN_WIN_URI     = 'chrome://launchpad-mozest-org/content/main.xul';
 	addonData.MAIN_WIN_TYPE    = 'launchpad-mozest-org:main';
 	addonData.OPTIONS_WIN_URI  = 'chrome://launchpad-mozest-org/content/options.xul';
 	addonData.OPTIONS_WIN_TYPE = 'launchpad-mozest-org:options';

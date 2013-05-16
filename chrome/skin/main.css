@@ -15,19 +15,6 @@
     -moz-user-select: none;
 }
 
-html,
-body
-{
-    padding: 0;
-    margin: 0;
-}
-
-form, table, tr, td
-{
-    padding: 0;
-    margin: 0;
-}
-
 a,
 a:active,
 a:focus
@@ -40,11 +27,17 @@ input
     -moz-user-select: text;
 }
 
+#scrollbox
+{
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
 #container
 {
     position: relative;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: visible;
 }
 
 #dialpad
@@ -170,7 +163,7 @@ input
     top: 0;
     right: 0;
     bottom: 28px;
-    background-color: rgb(255,255,255);
+    background-color: transparent;
     background-size: cover;
     background-repeat: no-repeat;
     background-origin: padding-box;
@@ -249,151 +242,7 @@ input
     left: 18px;
     bottom: 18px;
     display: none;
-}
-
-div.popup
-{
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,.5);
-    background-color: rgb(255,255,255);
-    padding: 10px;
-    position: absolute;
-    min-width: 40px;
-    z-index: 5000;
-    left: 0;
-    top: 0;
-}
-
-
-div.popup:after
-{
-    position: absolute;
-    display: inline-block;
-    content: '';
-}
-div.popup.right:after
-{
-    border-top: 10px solid transparent;
-    border-right: 10px solid rgb(255,255,255);
-    border-bottom: 10px solid transparent;
-    left: -10px;
-}
-
-div.popup.left:after
-{
-    border-top: 10px solid transparent;
-    border-left: 10px solid rgb(255,255,255);
-    border-bottom: 10px solid transparent;
-    right: -10px;
-}
-
-div.popup.bottom:after
-{
-    border-left: 10px solid transparent;
-    border-bottom: 10px solid rgb(255,255,255);
-    border-right: 10px solid transparent;
-    top: -10px;
-}
-
-div.popup.top:after
-{
-    border-left: 10px solid transparent;
-    border-top: 10px solid rgb(255,255,255);
-    border-right: 10px solid transparent;
-    bottom: -10px;
-}
-
-#settings-button
-{
-    width: 16px;
-    height: 16px;
-    position: fixed;
-    right: 20px;
-    top: 10px;
-    background-color: transparent;
-    background-image: url("chrome://launchpad-mozest-org/skin/icons/settings.png");
-    background-position: 0 0;
-    background-size: 16px;
-    background-repeat: no-repeat;
-    border: none;
-    opacity: 0.5;
-}
-
-#settings-button.active
-{
-    opacity: 0.75;
-}
-
-#settings-button:active
-{
-    opacity: 1;
-}
-
-.panel,
-#settings-panel
-{
-    position: fixed;
-    transition: 2000ms ease;
-    padding: 20px;
-    transition-property: opacity, visibility;
-    font-size: 109%;
-    line-height: 134%;
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0ms ease 200ms, opacity 200ms ease;
-}
-
-#settings-panel
-{
-    width: 460px;
-    margin-top: 10px;
-}
-
-.panel.active,
-#settings-panel.active
-{
-    visibility: visible;
-    opacity: 1;
-    transition-delay: 0ms;
-}
-
-#settings-panel.popup:after
-{
-    right: 8px;
-}
-
-#settings-panel table
-{
-    width: 100%;
-}
-#settings-panel table td
-{
-    padding: 5px 0;
-}
-#settings-panel table td:first-child
-{
-    width: 40%;
-}
-#settings-panel select
-{
-    width: 100%;
-    font-size: 100%;
-    padding: 1px;
-}
-
-#settings-panel select option
-{
-}
-
-#settings-panel div.range-slider
-{
-    float: left;
-    width: 220px;
-}
-
-#settings-panel #zoom-percentage
-{
-    float: right;
+    opacity: .75;
 }
 
 div.range-slider
@@ -401,6 +250,7 @@ div.range-slider
     height: 16px;
     position: relative;
     opacity: 0.5;
+    width: 100%;
 }
 div.range-slider:not([readOnly="true"])
 {
@@ -486,6 +336,171 @@ div.range-slider div.scaleplate span:last-child
     height: 2px;
 }
 
+.popup
+{
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,.5);
+    background-color: rgb(255,255,255);
+    padding: 10px;
+    position: fixed;
+    min-width: 40px;
+    z-index: 5000;
+    left: 0;
+    top: 0;
+    display: -moz-box;
+    font-size: 109%;
+}
+
+.popup grid
+{
+    width: 100%;
+}
+
+.popup row
+{
+    padding: 5px 0;
+}
+
+.popup row:first-child
+{
+    padding-top: 0;
+}
+
+.popup row:last-child
+{
+    padding-bottom: 0;
+}
+
+.popup label,
+.popup menulist
+{
+    margin: 2px 0;
+}
+
+.popup menulist
+{
+    padding: 1px 0;
+}
+
+.popup button .button-text
+{
+    text-align: center;
+    padding: 1px 0;
+}
+
+.popup:after
+{
+    position: absolute;
+    display: inline-block;
+    content: '';
+}
+.popup.right:after
+{
+    border-top: 10px solid transparent;
+    border-right: 10px solid rgb(255,255,255);
+    border-bottom: 10px solid transparent;
+    left: -10px;
+}
+
+.popup.left:after
+{
+    border-top: 10px solid transparent;
+    border-left: 10px solid rgb(255,255,255);
+    border-bottom: 10px solid transparent;
+    right: -10px;
+}
+
+.popup.bottom:after
+{
+    border-left: 10px solid transparent;
+    border-bottom: 10px solid rgb(255,255,255);
+    border-right: 10px solid transparent;
+    top: -10px;
+}
+
+.popup.top:after
+{
+    border-left: 10px solid transparent;
+    border-top: 10px solid rgb(255,255,255);
+    border-right: 10px solid transparent;
+    bottom: -10px;
+}
+
+#button-settings
+{
+    width: 16px;
+    height: 16px;
+    position: fixed;
+    right: 20px;
+    top: 10px;
+    background-color: transparent;
+    background-image: url("chrome://launchpad-mozest-org/skin/icons/settings.png");
+    background-position: 0 0;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    border: none;
+    opacity: 0.5;
+}
+
+#button-settings.active
+{
+    opacity: 0.75;
+}
+
+#button-settings:active
+{
+    opacity: 1;
+}
+
+.panel,
+#panel-settings
+{
+    position: fixed;
+    transition: 2000ms ease;
+    padding: 20px;
+    transition-property: opacity, visibility;
+    font-size: 109%;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0ms ease 200ms, opacity 200ms ease;
+}
+
+#panel-settings
+{
+    width: 460px;
+    margin-top: 10px;
+}
+
+.panel.active,
+#panel-settings.active
+{
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0ms;
+}
+
+#panel-settings row box
+{
+    display: block;
+}
+
+#panel-settings .control
+{
+    position: relative;
+}
+
+#panel-settings #zoom-percentage
+{
+    margin-left: 1em;
+}
+
+.panel
+{
+    width: 500px;
+    padding: 20px !important;
+}
+
+
 /* retina */
 @media (min-resolution: 2dppx)
 {
@@ -515,7 +530,7 @@ div.range-slider div.scaleplate span:last-child
         background-image: url("chrome://launchpad-mozest-org/skin/icons/blank@2x.png");
     }
 
-    #settings-button
+    #button-settings
     {
         background-image: url("chrome://launchpad-mozest-org/skin/icons/settings@2x.png");
     }
@@ -529,61 +544,3 @@ div.range-slider div.scaleplate span:last-child
         -moz-border-left-colors:   rgba(0,0,0,.3) rgba(0,0,0,.3) rgba(128,128,128,.5) rgba(128,128,128,.5) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.25) rgba(0,0,0,.36) rgba(0,0,0,.36) rgba(255,255,255,.5) rgba(255,255,255,.5);
     }
 }
-
-.panel
-{
-    width: 400px;
-    padding: 20px !important;
-}
-
-.panel table
-{
-    width: 100%;
-}
-
-.panel tr
-{
-    display: -moz-box;
-    width: 100%;
-    margin-bottom: 1em;
-}
-
-.panel tr:last-child
-{
-    margin-top: 1em;
-    margin-bottom: 0;
-}
-
-
-.panel td:first-child
-{
-    -moz-box-flex: 1;
-}
-
-.panel td:last-child
-{
-    -moz-box-flex: 5000;
-    display: -moz-box;
-}
-
-.panel tr:last-child td
-{
-    display: block;
-    text-align: right;
-}
-
-.panel tr:last-child td button
-{
-    font-size: 100%;
-    padding: 2px 5px;
-    width: 90px;
-    line-height: 139%;
-    margin-left: 1em;
-}
-
-.panel input
-{
-    -moz-box-flex: 1;
-}
-
-

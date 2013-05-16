@@ -5,6 +5,7 @@
 :root
 {
     -moz-user-select: none;
+    font-size: 82%;
 }
 
 #logo
@@ -32,11 +33,11 @@ label
 #keystroke-recorder
 {
     text-align: center;
-    font-size: 84%;
+    font-size: 100%;
     border-radius: 20px !important;
     border: 1px solid rgba(0,0,0,.3);
     background-color: rgb(255,255,255);
-    padding: 4px;
+    padding: 2px 4px;
     cursor: default !important;
     -moz-appearance: none;
     width: 280px;
@@ -50,8 +51,6 @@ label
 
 #keystroke-recorder-input
 {
-    border-radius: 10px;
-    text-align: center;
     height: 0;
     width: 0;
     border: 0;
@@ -65,7 +64,7 @@ label
 ::-moz-placeholder
 {
     color: #000;
-    font-size: 84%;
+    font-size: 85%;
 }
 .setting-box
 {

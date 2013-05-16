@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://launchpad-mozest-org/skin/main.css" type="text/css"?>
+
+<!DOCTYPE page [
+    <!ENTITY % launchpadDTD SYSTEM "chrome://launchpad-mozest-org/locale/locale.dtd"> %launchpadDTD;
+]>
+
+<page xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+      xmlns:html="http://www.w3.org/1999/xhtml"
+      title="&launchpad.WindowTitle;"
+      disablefastfind="true">
+
+    <popupset>
+        <panel id="popup-autocomplete-richresult" type="autocomplete-richlistbox" noautofocus="true" ignorekeys="true" level="top" consumeoutsideclicks="false"/>
+        <menupopup id="popup-edit-item" oncommand="Launchpad.speeddial.contextmenuCommand(event, event.target.id, this.index);">
+            <menuitem id="popup-edit-item-edit" label="&popupEditItem.edit;"/>
+            <menuseparator/>
+            <menuitem id="popup-edit-item-reload" label="&popupEditItem.reload;"/>
+            <menuseparator/>
+            <menuitem id="popup-edit-item-remove" label="&popupEditItem.remove;"/>
+        </menupopup>
+    </popupset>
+    <keyset>
+        <key keycode="VK_UP" oncommand="ScrollByUpKey();"/>
+        <key keycode="VK_DOWN" oncommand="ScrollByDownKey();"/>
+        <key keycode="VK_PAGE_UP" oncommand="ScrollByPageUpKey();"/>
+        <key keycode="VK_PAGE_DOWN" oncommand="ScrollByPageDownKey();"/>
+        <key keycode="VK_HOME" oncommand="ScrollByHomeKey();"/>
+        <key keycode="VK_END" oncommand="ScrollByEndKey();"/>
+    </keyset>
+
+    <scrollbox flex="1" id="scrollbox">
+        <vbox id="container">
+            <html:div id="dialpad"/>
+        </vbox>
+        <html:button id="button-settings"/>
+
+        <html:div id="panel-settings" class="popup bottom">
+            <grid flex="1">
+                <columns flex="1">
+                    <column flex="3" />
+                    <column flex="7"/>
+                </columns>
+                <rows>
+                    <row align="center">
+                        <label control="zoom-mode" value="&panelSettings.zoomMode.label;"/>
+                        <hbox>
+                            <menulist id="zoom-mode" flex="1">
+                                <menupopup>
+                                    <menuitem value="1" label="&panelSettings.zoomMode.automatic;"/>
+                                    <menuitem value="0" label="&panelSettings.zoomMode.manual;"/>
+                                </menupopup>
+                            </menulist>
+                        </hbox>
+                    </row>
+                    <row align="center">
+                        <label control="zoom-adjuster" value="&panelSettings.zoomLevel.label;"/>
+                        <hbox>
+                            <box flex="1"><html:div class="control">
+                                <html:input id="zoom-adjuster" type="range" min="30" max="200" step="10" data-scales="30,50,100,150,200"/>
+                            </html:div></box>
+                            <description id="zoom-percentage"/>
+                        </hbox>
+                    </row>
+                </rows>
+            </grid>
+        </html:div>
+
+        <html:div id="panel-add-item" class="panel popup">
+            <grid flex="1">
+                <columns flex="1">
+                    <column/>
+                    <column flex="1"/>
+                </columns>
+                <rows>
+                    <row align="center">
+                        <label control="panel-add-item-address-textbox" value="&panelEditItem.address.label;"/>
+                        <textbox id="panel-add-item-address-textbox" type="autocomplete" ontextentered=""
+                                 autocompletepopup="popup-autocomplete-richresult"
+                                 autocompletesearch="urlinline history"
+                                 sizetopopup="pref"
+                                 clickSelectsAll="true"
+                                 completedefaultindex="true"
+                                 completeselectedindex="true"
+                                 showcommentcolumn="true"
+                                 maxrows="6"
+                                 newlines="stripsurroundingwhitespace"
+                                 placeholder="&panelEditItem.address.tooltip;"/>
+                    </row>
+                    <row align="center">
+                        <spacer/>
+                        <box flex="1">
+                            <spacer flex="1"/>
+                            <button label="&button.cancel.label;"/>
+                            <button default="true" label="&button.done.label;"/>
+                        </box>
+                    </row>
+                </rows>
+            </grid>
+        </html:div>
+
+        <html:div id="panel-edit-item" class="panel popup">
+            <grid flex="1">
+                <columns flex="1">
+                    <column/>
+                    <column flex="1"/>
+                </columns>
+                <rows>
+                    <row align="center">
+                        <label control="panel-edit-item-address-textbox" value="&panelEditItem.address.label;"/>
+                        <textbox id="panel-edit-item-address-textbox" type="autocomplete" ontextentered=""
+                                 autocompletepopup="popup-autocomplete-richresult"
+                                 autocompletesearch="urlinline history"
+                                 sizetopopup="pref"
+                                 clickSelectsAll="true"
+                                 completedefaultindex="true"
+                                 completeselectedindex="true"
+                                 showcommentcolumn="true"
+                                 maxrows="6"
+                                 newlines="stripsurroundingwhitespace"
+                                 placeholder="&panelEditItem.address.tooltip;"/>
+                    </row>
+                    <row align="center">
+                        <label control="panel-edit-item-title-textbox" value="&panelEditItem.title.label;"/>
+                        <textbox id="panel-edit-item-title-textbox" type="autocomplete" ontextentered=""
+                                 autocompletepopup="popup-autocomplete-richresult"
+                                 placeholder="&panelEditItem.title.tooltip;"/>
+                    </row>
+                    <row align="center">
+                        <spacer/>
+                        <box flex="1">
+                            <spacer flex="1"/>
+                            <button label="&button.cancel.label;"/>
+                            <button default="true" label="&button.done.label;"/>
+                        </box>
+                    </row>
+                </rows>
+            </grid>
+        </html:div>
+
+        <html:style id="style"/>
+        <script type="application/javascript" src="chrome://launchpad-mozest-org/content/common.js"/>
+        <script type="application/javascript" src="chrome://launchpad-mozest-org/content/defines.js"/>
+        <script type="application/javascript" src="chrome://launchpad-mozest-org/content/speeddial.js"/>
+        <script type="application/javascript" src="chrome://launchpad-mozest-org/content/popup.js"/>
+        <script type="application/javascript" src="chrome://launchpad-mozest-org/content/main.js"/>
+    </scrollbox>
+</page>

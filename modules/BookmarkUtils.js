@@ -63,7 +63,7 @@ let BookmarkUtils = exports.BookmarkUtils =
 			switch (aBookmarkInfo.type)
 			{
 				case this.TYPE_BOOKMARK:
-					bookmarksService.insertBookmark(aBookmarkInfo.folderID, NetUtil.newURI(aBookmarkInfo.uri), aBookmarkInfo.index, aBookmarkInfo.title)
+					bookmarksService.insertBookmark(aBookmarkInfo.folderID, NetUtil.newURI(autocompleURI(aBookmarkInfo.uri)), aBookmarkInfo.index, aBookmarkInfo.title)
 					break;
 
 				case this.TYPE_FOLDER:
@@ -75,7 +75,7 @@ let BookmarkUtils = exports.BookmarkUtils =
 						title    : aBookmarkInfo.title,
 						parentId : aBookmarkInfo.folderID,
 						index    : aBookmarkInfo.index,
-						feedURI  : NetUtil.newURI(aBookmarkInfo.uri)
+						feedURI  : NetUtil.newURI(autocompleURI(aBookmarkInfo.uri))
 					});
 					break;
 			}
@@ -91,7 +91,7 @@ let BookmarkUtils = exports.BookmarkUtils =
 
 			if (aBookmarkInfo.uri && aBookmarkInfo.uri != oldBookmark.uri && typeof(aBookmarkInfo.type) !== 'undefined' && ! isNaN(aBookmarkInfo.type) != this.TYPE_FOLDER)
 			{
-				bookmarksService.changeBookmarkURI(aBookmarkInfo.id, NetUtil.newURI(aBookmarkInfo.uri));
+				bookmarksService.changeBookmarkURI(aBookmarkInfo.id, NetUtil.newURI(autocompleURI(aBookmarkInfo.uri)));
 			}
 
 			if ( ! aBookmarkInfo.title || aBookmarkInfo.title != oldBookmark.title)
@@ -243,22 +243,19 @@ let BookmarkUtils = exports.BookmarkUtils =
 		for (let i = 0; i < container.childCount; i++)
 		{
 			let item = container.getChild(i);
-			if (item.type != item.RESULT_TYPE_SEPARATOR)
-			{
-				let type = this.getBookmarkType(item.itemId);
+			let type = this.getBookmarkType(item.itemId);
 
-				if ( ! aResultType || (Array.isArray(aResultType) && aResultType.indexOf(type) >= 0))
+			if ( ! aResultType || (Array.isArray(aResultType) && aResultType.indexOf(type) >= 0))
+			{
+				bookmarks.push(
 				{
-					bookmarks.push(
-					{
-						id       : item.itemId,
-						type     : type,
-						uri      : item.uri,
-						title    : item.title,
-						index    : item.bookmarkIndex,
-						folderID : item.parent.itemId
-					});
-				}
+					id       : item.itemId,
+					type     : type,
+					uri      : item.uri,
+					title    : item.title,
+					index    : item.bookmarkIndex,
+					folderID : item.parent.itemId
+				});
 			}
 		}
 		container.containerOpen = false;
@@ -321,6 +318,18 @@ let BookmarkUtils = exports.BookmarkUtils =
 	}
 }
 
+function autocompleURI(aURI)
+{
+	let pattern = /^[a-z][a-z0-9+-\.]*:/i;
+
+	if ( ! pattern.test(aURI))
+	{
+		aURI = 'http://' + aURI;
+	}
+
+	return aURI;
+}
+
 let observer =
 {
 	onBeginUpdateBatch : function()
@@ -336,11 +345,6 @@ let observer =
 	onItemAdded : function(aID, aFolderID, aIndex, aType, aURI, aTitle)
 	{
 		let type = BookmarkUtils.getBookmarkType(aID);
-
-		if ( ! type || type == BookmarkUtils.TYPE_SEPARATOR)
-		{
-			return;
-		}
 
 		let bookmark =
 		{
@@ -380,6 +384,11 @@ let observer =
 	},
 	onItemMoved : function(aID, aOldFolderID, aOldIndex, aNewFolderID, aNewIndex, aType)
 	{
+		if (aType == BookmarkUtils.TYPE_FOLDER && annotationService.itemHasAnnotation(aID, BookmarkUtils.LMANNO_FEEDURI))
+		{
+			aType = BookmarkUtils.TYPE_LIVEMARK;
+		}
+
 		for (let i = 0; i < observerHandlers.moved.length; i++)
 		{
 			observerHandlers.moved[i](aID, aOldFolderID, aOldIndex, aNewFolderID, aNewIndex, aType);

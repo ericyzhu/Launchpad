@@ -109,6 +109,7 @@ Launchpad.popup =
 	{
 		if (this.popupElement == aPopupElement && this.targetElement == aTargetElement)
 		{
+			this._resetPosition();
 			return;
 		}
 
@@ -123,32 +124,29 @@ Launchpad.popup =
 	},
 	hide : function()
 	{
-		if ( ! this.popupElement && ! this.targetElement)
-		{
-			return;
-		}
+		if ( ! this.popupElement && ! this.targetElement) return;
+
+		Array.prototype.forEach.call(this.popupElement.querySelectorAll('textbox'), function(aTextbox) aTextbox.blur());
 
 		this.popupElement.classList.remove('active');
 		this.targetElement.classList.remove('active');
 		this.popupElement = null;
 		this.targetElement = null;
 	},
-
 	init : function()
 	{
-		this.styleSheet = document.createElement('style');
-		document.querySelector('head').appendChild(this.styleSheet);
+		this.styleSheet = document.getElementById('style');
 
-		window.addEventListener('resize', function(e)
+		window.addEventListener('resize', function()
 		{
 			this._resetPosition();
 		}.bind(this), false);
 
-		window.addEventListener('scroll', function(e)
+		scrollbox.addEventListener('scroll', function()
 		{
 			this.hide();
 		}.bind(this), false);
 
 		return this;
 	}
-}.init();
+};

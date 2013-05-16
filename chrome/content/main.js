@@ -8,6 +8,10 @@
 
 function init()
 {
+	let scrollBoxObject;
+	scrollbox = document.getElementById('scrollbox');
+	scrollBoxObject = scrollbox.boxObject.QueryInterface(Ci.nsIScrollBoxObject);
+
 	// window resize stop listener
 	(function()
 	{
@@ -47,7 +51,7 @@ function init()
 			let now = Date.now();
 			if (now - last < threshold)
 			{
-				//window.clearTimeout(timer);
+				window.clearTimeout(timer);
 				timer = window.setTimeout(function() checkTime(), 10);
 			}
 			else
@@ -62,175 +66,6 @@ function init()
 			}
 		}
 	})();
-
-	let gNavToolboxAttrListener =
-	{
-		_listeners : null,
-		_listener : null,
-		add : function(aAttrName, aCallback)
-		{
-			if ( ! this._listeners[aAttrName])
-			{
-				this._listeners[aAttrName] = [];
-			}
-
-			if (this._listeners[aAttrName].indexOf(aCallback) < 0)
-			{
-				this._listeners[aAttrName].push(aCallback);
-			}
-		},
-		remove : function(aAttrName, aCallback)
-		{
-			if (this._listeners[aAttrName])
-			{
-				let index = this._listeners[aAttrName].indexOf(aCallback);
-				if (index >= 0)
-				{
-					this._listeners[aAttrName].splice(index, 1);
-				}
-
-				if ( ! this._listeners[aAttrName].length)
-				{
-					delete this._listeners[aAttrName];
-				}
-			}
-		},
-		init : function()
-		{
-			this._listener = function(aEvent)
-			{
-				let callbacks = this._listeners[aEvent.attrName];
-
-				if (callbacks)
-				{
-					let {prevValue, newValue} = aEvent;
-
-					for (let i = 0; i < callbacks.length; i++)
-					{
-						callbacks[i](mainWindow.gNavToolbox, prevValue, newValue);
-					}
-				}
-			}.bind(this);
-			this._listeners = {};
-			mainWindow.gNavToolbox.addEventListener('DOMAttrModified', this._listener, false);
-			return this;
-		},
-		uninit : function()
-		{
-			mainWindow.gNavToolbox.removeEventListener('DOMAttrModified', this._listener, false);
-			this._listeners = {};
-			this._listener = null;
-		}
-	}.init();
-	window.addEventListener('beforeunload', function() gNavToolboxAttrListener.uninit(), false);
-
-	document.addEventListener('contextmenu', Launchpad.events.disableEvent, false);
-
-	Launchpad.bookmarks.load(Prefs.bookmarksFolderID);
-	Launchpad.dialpad.init();
-	Launchpad.button.init();
-
-	function resizeView()
-	{
-		Launchpad.dialpad.resetCurrent();
-		Launchpad.button.resetCurrent();
-
-		let thumbnailElements = document.querySelectorAll('.' + DIALPAD_BUTTON_THUMBNAIL_CLASS);
-
-		for (let i = 0; i < thumbnailElements.length; i++)
-		{
-			thumbnailElements[i].style.imageRendering = '-moz-crisp-edges';
-		}
-
-		Launchpad.button.resetPosition();
-	}
-
-	PrefListener.add(listener);
-	window.addEventListener('beforeunload', function(e) PrefListener.remove(listener), false);
-
-	function listener(aName, aValue)
-	{
-		switch (aName)
-		{
-			case 'dialpadButtonRatio':
-			case 'dialpadButtonAutosizeEnabled':
-				resizeView();
-				break;
-		}
-	}
-
-	mainWindow.addEventListener('keydown', closeLaunchpad, false);
-	window.addEventListener('beforeunload', function(e) mainWindow.removeEventListener('keydown', closeLaunchpad), false);
-	window.addEventListener('mousedown', closeLaunchpad, false);
-
-	function closeLaunchpad(aEvent, aEscKey)
-	{
-		let eventType = aEvent.type;
-
-		switch (eventType)
-		{
-			case 'keydown':
-				if (aEvent.keyCode != 27) return;
-				break;
-
-			case 'mousedown':
-				if (aEvent.button != 0) return;
-				break;
-
-			default:
-				return;
-		}
-
-		let popups = document.querySelectorAll('.popup');
-		let popupOpened = false;
-		let popupLocked = false;
-
-		for (let i = 0; i < popups.length; i++)
-		{
-			let popup = popups[i];
-			if (popup.classList.contains('active'))
-			{
-				popupOpened = true;
-
-				if (eventType == 'mousedown')
-				{
-					let {clientX, clientY} = aEvent;
-					let {left, top, right, bottom} = popup.getBoundingClientRect()
-					if (clientX > left && clientX < right && clientY > top && clientY < bottom)
-					{
-						popupLocked = true;
-						break;
-					}
-				}
-			}
-		}
-
-		if (popupOpened)
-		{
-			if ( ! popupLocked || eventType == 'keydown')
-			{
-				Launchpad.popup.hide();
-			}
-
-			return;
-		}
-		else
-		{
-			mainWindow.ToggleLaunchpadWindow(false);
-		}
-	}
-
-	window.addEventListener('resize', resizeView, true);
-
-	window.resizeStopListener.add(function()
-	{
-		let thumbnailElements = document.querySelectorAll('.' + DIALPAD_BUTTON_THUMBNAIL_CLASS);
-
-		for (let i = 0; i < thumbnailElements.length; i++)
-		{
-			thumbnailElements[i].style.imageRendering = 'auto';
-		}
-	});
 
 	// replace input[type='range']
 	(function()
@@ -271,19 +106,18 @@ function init()
 			let slider, scaleplate, track, thumb;
 			init()
 
-			function updateScaleplate()
+			function update()
 			{
+				let {min, max, scales, value, width} = getSliderValue();
+				thumb.style.left = Math.round(((value - min) / (max - min)) * width) + 'px';
 				if (aInput.dataset.scales)
 				{
-					let scales = aInput.dataset.scales.replace(/\s+/g, '').split(',');
 					if (scales.length)
 					{
 						while (scaleplate.firstChild)
 						{
 							scaleplate.removeChild(scaleplate.firstChild);
 						}
-
-						let {min, max, width} = getSliderValue();
 
 						for (let n = 0; n < scales.length; n++)
 						{
@@ -328,13 +162,14 @@ function init()
 				let max = aInput.max;
 				let step = aInput.step;
 				let value = aInput.value;
+				let scales = aInput.dataset.scales.replace(/\s+/g, '').split(',');
 
 				(min == '' || isNaN((min = parseFloat(min)))) && (min = 0);
 				(max == '' || isNaN((max = parseFloat(max)))) && (max = 100);
 				(step == '' || isNaN((step = parseFloat(step)))) && (step = 1);
 				(value == '' || isNaN((value = parseFloat(value)))) && (value = (max < min) ? min : (min + (max - min) / 2));
 
-				return {min : min, max : max, step : step, value : value, width : slider.offsetWidth, left : slider.getBoundingClientRect().left};
+				return {min : min, max : max, step : step, value : value, scales : scales, width : slider.offsetWidth, left : slider.getBoundingClientRect().left};
 			}
 
 			function dispatchEvent()
@@ -405,7 +240,7 @@ function init()
 							case 'min':
 							case 'max':
 							case 'data-scales':
-								updateScaleplate();
+								update();
 								break;
 						}
 					});
@@ -414,174 +249,113 @@ function init()
 
 			function init()
 			{
-				let node = fragment.cloneNode(true);
-				slider = node.firstChild;
+				slider = fragment.cloneNode(true).firstChild;
+				aInput.parentNode.insertBefore(slider, aInput);
+				slider.setAttribute('readOnly', aInput.readOnly == true ? true : false);
+
 				scaleplate = slider.querySelector('.scaleplate');
 				track = slider.querySelector('.track');
 				thumb = slider.querySelector('.thumb');
 
-				slider.setAttribute('readOnly', aInput.readOnly == true ? true : false);
-
-				let {min, max, step, value, width} = getSliderValue();
-				aInput.setAttribute('min', min);
-				aInput.setAttribute('max', max);
-				aInput.setAttribute('step', step);
+				let {min, max, step, value, scales, width} = getSliderValue();
 				aInput.setAttribute('value', value);
-				thumb.style.left = Math.round(((value - min) / (max - min)) * width) + 'px';
-
-				aInput.style.display = 'none';
-				aInput.parentNode.insertBefore(node, aInput);
-				updateScaleplate();
+				aInput.setAttribute('step', step);
+				aInput.setAttribute('max', max);
+				aInput.setAttribute('min', min);
 				bindEvents();
+				aInput.setAttribute('data-scales', scales.join(','));
+				aInput.style.display = 'none';
 			}
 		}
 	})();
 
-	// settings
-	(function()
+	Launchpad.popup.init();
+	Launchpad.speeddial.init();
+
+	//
+	window.ScrollByUpKey = function() scrollBoxObject.scrollByLine(-1);
+	window.ScrollByDownKey = function() scrollBoxObject.scrollByLine(1);
+	window.ScrollByPageUpKey = function() scrollBoxObject.scrollBy(0, -scrollBoxObject.height);
+	window.ScrollByPageDownKey = function() scrollBoxObject.scrollBy(0, scrollBoxObject.height);
+	window.ScrollByHomeKey = function() scrollBoxObject.scrollTo(0, 0);
+	window.ScrollByEndKey = function() scrollBoxObject.scrollBy(0, scrollbox.scrollHeight);
+
+	document.addEventListener('contextmenu', function(aEvent)
 	{
-		let button = document.getElementById('settings-button');
-		let panel = document.getElementById('settings-panel');
-		button.addEventListener('click', function(e)
+		aEvent.stopPropagation();
+		aEvent.preventDefault();
+	}, false);
+
+	mainWindow.addEventListener('keydown', closeLaunchpad, false);
+	window.addEventListener('beforeunload', function(e) mainWindow.removeEventListener('keydown', closeLaunchpad), false);
+	document.getElementById(CONTAINER_ID).addEventListener('mousedown', function(aEvent)
+	{
+		if (mainWindow.gURLBar.getAttribute('focused') == 'true')
 		{
-			e.button == 0 && Launchpad.popup.show(panel, button);
-		}, true);
-		button.addEventListener('mousedown', Launchpad.events.disableEvent, true);
+			window.focus();
+			return;
+		}
 
-		let zoomMode = document.getElementById('zoom-mode');
-		let zoomAdjuster = document.getElementById('zoom-adjuster');
-		let zoomPercentage = document.getElementById('zoom-percentage');
-		zoomMode.value = Prefs.dialpadButtonAutosizeEnabled << 0;
+		closeLaunchpad(aEvent);
+	}, false);
 
-		zoomAdjuster.value = Prefs.dialpadButtonRatio * 100;
-		zoomAdjuster.readOnly = Prefs.dialpadButtonAutosizeEnabled;
-		zoomPercentage.textContent = (Prefs.dialpadButtonRatio * 100) + '%';
-		zoomAdjuster.addEventListener('change', function(e)
+	function closeLaunchpad(aEvent)
+	{
+		let eventType = aEvent.type;
+
+		switch (eventType)
 		{
-			let value = Math.round(zoomAdjuster.value);
-			Prefs.dialpadButtonRatio = value / 100;
-			zoomPercentage.textContent = value + '%';
-		}, false);
+			case 'keydown':
+				if (aEvent.keyCode != 27) return;
+				break;
 
-		zoomMode.addEventListener('change', function(e)
+			case 'mousedown':
+				if (aEvent.button != 0) return;
+				break;
+
+			default:
+				return;
+		}
+
+		let popups = document.querySelectorAll('.popup');
+		let popupOpened = false;
+		let popupLocked = document.getElementById('popup-autocomplete-richresult').mPopupOpen;
+
+		for (let i = 0; i < popups.length; i++)
 		{
-			let value = zoomMode.value == 1;
-			Prefs.dialpadButtonAutosizeEnabled = value;
-			zoomAdjuster.readOnly = value;
-		}, false);
-
-		PrefListener.add(listener);
-		window.addEventListener('beforeunload', function(e) PrefListener.remove(listener), false);
-
-		function listener(aName, aValue)
-		{
-			switch (aName)
+			let popup = popups[i];
+			if (popup.classList.contains('active'))
 			{
-				case 'dialpadButtonRatio':
-					zoomAdjuster.value = aValue * 100;
-					break;
+				popupOpened = true;
 
-				case 'dialpadButtonAutosizeEnabled':
-					zoomMode.value = aValue << 0;
-					break;
+				if (eventType == 'mousedown')
+				{
+					let {clientX, clientY} = aEvent;
+					let {left, top, right, bottom} = popup.getBoundingClientRect()
+					if (clientX > left && clientX < right && clientY > top && clientY < bottom)
+					{
+						popupLocked = true;
+						break;
+					}
+				}
 			}
 		}
 
-		let TabsBar = mainWindow.document.getElementById('TabsToolbar');
-		let ToolbarMenu = mainWindow.document.getElementById('toolbar-menubar');
-		function getToolbarHeight()
+		if (popupOpened)
 		{
-			return TabsBar.boxObject.height + ToolbarMenu.boxObject.height;
+			if ( ! popupLocked || eventType == 'keydown')
+			{
+				Launchpad.popup.hide();
+			}
+
+			return;
 		}
-		let buttonTop = getStyle(button, 'top');
-		gNavToolboxAttrListener.add('style', function(gNavToolbox, aPrevValue, aNewValue)
+		else
 		{
-			if (aNewValue.indexOf('position') >= 0 || aNewValue.indexOf('height') >= 0)
-			{
-				gNavToolbox.style.zIndex = 1;
-				let {top, bottom} = gNavToolbox.getBoundingClientRect();
-				button.style.top = (buttonTop + (bottom - top - getToolbarHeight())) + 'px';
-				panel.classList.contains('active') && Launchpad.popup.show(panel, button);
-			}
-		});
-	})();
+			mainWindow.ToggleLaunchpadWindow(false);
+		}
+	}
 
-	// add bookmark panel
-	(function()
-	{
-		let panel = document.getElementById('add-bookmark-panel');
-		let form = panel.querySelector('form');
-		let uriControl = form.querySelector('input');
-
-		form.querySelector('button[type="reset"]').addEventListener('click', function(e)
-		{
-			e.preventDefault();
-			e.stopPropagation();
-			Launchpad.popup.hide();
-		}, false);
-
-		form.addEventListener('submit', function(e)
-		{
-			e.preventDefault();
-			e.stopPropagation();
-
-			let uri = uriControl.value.trim();
-
-			if (uri)
-			{
-				let bookmarks = Launchpad.bookmarks;
-				bookmarks.add(
-					{
-						uri      : uri,
-						title    : '',
-						type     : bookmarks.TYPE_BOOKMARK,
-						index    : bookmarks.DEFAULT_INDEX,
-						folderID : bookmarks.folderID
-					});
-
-				Launchpad.popup.hide();
-			}
-		}, false);
-	}());
-
-	// edit bookmark panel
-	(function()
-	{
-		let panel = document.getElementById('edit-bookmark-panel');
-		let form = panel.querySelector('form');
-		let uriControl = form.querySelector('input[type="url"]');
-		let titleControl = form.querySelector('input[type="text"]');
-
-		form.querySelector('button[type="reset"]').addEventListener('click', function(e)
-		{
-			e.preventDefault();
-			e.stopPropagation();
-			Launchpad.popup.hide();
-		}, false);
-
-		form.addEventListener('submit', function(e)
-		{
-			e.preventDefault();
-			e.stopPropagation();
-
-			let uri = uriControl.value.trim();
-			let title = titleControl.value.trim();
-
-			if (uri)
-			{
-				let bookmarks = Launchpad.bookmarks;
-				bookmarks.update(
-					{
-						id    : panel.oID,
-						uri   : uri,
-						title : title,
-						type  : bookmarks.TYPE_BOOKMARK
-					});
-
-				Launchpad.popup.hide();
-			}
-		}, false);
-	}());
 }
 
 window.addEventListener('load', init, false);

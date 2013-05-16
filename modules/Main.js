@@ -203,7 +203,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		{
 			this.resize();
 			this.window.classList.add('open');
-
+			this.browser.focus();
 			if (aWindow.gURLBar.value == '')
 			{
 				aWindow.gURLBar.focus();
@@ -213,6 +213,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		_close : function()
 		{
 			this.window.classList.remove('open');
+			this.browser.blur();
 			aWindow.gURLBar.blur();
 		},
 		toggle : function(aStage, aIsBlankPage)
@@ -249,7 +250,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		{
 			this.mainWindowContent = document.getElementById('content');
 
-			this.window = document.createElement('vbox');
+			this.window = document.createElement('box');
 			this.window.setAttribute('id', 'launchpad-mozest-org-window');
 
 			this.browser = document.createElement('browser');
@@ -261,6 +262,10 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 
 			this.window.appendChild(this.browser);
 			this.mainWindowContent.appendChild(this.window);
+
+			let hiddenWindow = document.createElement('box');
+			hiddenWindow.setAttribute('id', 'launchpad-mozest-org-hidden-window');
+			this.mainWindowContent.appendChild(hiddenWindow);
 
 			this.resize = function()
 			{
@@ -286,58 +291,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			delete aWindow.ToggleLaunchpadWindow;
 			this.window.parentNode.removeChild(this.window);
 			this.resize = null;
-		}
-	}.init();
-
-	// create context menu
-	let launchpadPopupset =
-	{
-		popupset : null,
-		init : function()
-		{
-			this.popupset = document.createElement('popupset');
-
-			let popup = document.createElement('menupopup');
-			popup.setAttribute('id', 'launchpad-edit-menu');
-			popup.setAttribute('oncommand', 'LaunchpadContextmenuCommand(event, event.target.id, this.oID);');
-			this.popupset.appendChild(popup);
-
-			let _edit = document.createElement('menuitem');
-			_edit.setAttribute('id', 'launchpad-edit-menu-edit');
-			_edit.setAttribute('label', locale.edit);
-			popup.appendChild(_edit);
-
-			popup.appendChild(document.createElement('menuseparator'));
-
-			let _reload = document.createElement('menuitem');
-			_reload.setAttribute('id', 'launchpad-edit-menu-reload');
-			_reload.setAttribute('label', locale.reload);
-			popup.appendChild(_reload);
-
-			popup.appendChild(document.createElement('menuseparator'));
-
-			let _remove = document.createElement('menuitem');
-			_remove.setAttribute('id', 'launchpad-edit-menu-remove');
-			_remove.setAttribute('label', locale.remove);
-			popup.appendChild(_remove);
-
-
-			document.getElementById('main-window').appendChild(this.popupset);
-
-			aWindow.LaunchpadContextmenuCommand = function(aEvent, aMenuID, aOID)
-			{
-				try
-				{
-					launchpadWindow.browser.contentWindow.Launchpad.button.contextmenuCommand(aEvent, aMenuID, aOID);
-				} catch (e) {};
-			};
-
-			return this;
-		},
-		uninit : function()
-		{
-			delete aWindow.LaunchpadContextmenuCommand;
-			this.popupset.parentNode.removeChild(this.popupset);
 		}
 	}.init();
 
@@ -523,7 +476,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		keyset.uninit();
 		gBrowserListener.uninit();
 		progressListener.uninit();
-		launchpadPopupset.uninit();
 		launchpadWindow.uninit();
 		styleSheet.uninit();
 		aWindow.removeEventListener('unload', onUnload);
@@ -534,7 +486,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		keyset.uninit();
 		gBrowserListener.uninit();
 		progressListener.uninit();
-		launchpadPopupset.uninit();
 		launchpadWindow.uninit();
 		onShutdown.remove(shutdownHandler);
 	}

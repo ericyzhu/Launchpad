@@ -17,9 +17,10 @@ let {FileUtils} = require('FileUtils');
 let locale = Localization.getBundle('locale');
 
 // WINNT | Linux | Darwin
-let OS = Services.appinfo.OS;
+const OS = Services.appinfo.OS;
 
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
+const SCROLLBOX_ID = 'scrollbox';
 const CONTAINER_ID = 'container';
 const DIALPAD_ID = 'dialpad';
 const DIALPAD_ADD_BUTTON_ID = 'dialpad-add-button';
@@ -33,6 +34,9 @@ const DIALPAD_BUTTON_REMOVE_BUTTON_CLASS = 'dialpad-button-remove-button';
 const DIALPAD_BUTTON_LOADING_CLASS = 'dialpad-button-loading';
 const SUPPORTED_DATATRANSFER_DATA_TYPES = ['text/x-moz-url', 'text/x-moz-text-internal'];
 
-let scrollbox;
+let scrollbox, container;
 let Launchpad = {};
+
+scrollbox = document.getElementById(SCROLLBOX_ID);
+container = document.getElementById(CONTAINER_ID);
 

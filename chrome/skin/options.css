@@ -24,13 +24,28 @@ label
     text-align: right;
 }
 
-#group
+grid
 {
-    width: 440px;
+    width: 500px;
     padding: 20px 20px 20px 20px;
 }
 
-#keystroke-recorder
+row
+{
+}
+
+vbox.setting-box
+{
+    position: relative;
+    width: 60%;
+}
+
+vbox.keystroke-recorder
+{
+    padding: .5em 0;
+}
+
+input.keystroke-recorder-display
 {
     text-align: center;
     font-size: 100%;
@@ -43,13 +58,13 @@ label
     width: 280px;
 }
 
-#keystroke-recorder[focused="true"]
+input.keystroke-recorder-display[focused="true"]
 {
     border-color: rgba(0,0,0,.5);
     box-shadow: 0 0 5px rgba(0,0,0,.5);
 }
 
-#keystroke-recorder-input
+input.keystroke-recorder-input
 {
     height: 0;
     width: 0;
@@ -60,18 +75,15 @@ label
     position: absolute;
     -moz-appearance: none;
     -moz-user-focus: ignore;
+    overflow: hidden;
 }
 ::-moz-placeholder
 {
     color: #000;
     font-size: 85%;
 }
-.setting-box
-{
-    position: relative;
-    width: 60%;
-}
-.input-clear-button
+
+vbox.keystroke-recorder img
 {
     opacity: .3;
     width: 16px;
@@ -85,18 +97,18 @@ label
     top: 50%;
     margin-top: -8px;
 }
-.input-clear-button:hover
+vbox.keystroke-recorder img:hover
 {
     opacity: .4;
 }
-.input-clear-button:active
+vbox.keystroke-recorder img:active
 {
     opacity: .5;
 }
 
 #spacer
 {
-    height: 2em;
+    height: 1.5em;
 }
 
 /* retina */

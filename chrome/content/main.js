@@ -9,7 +9,6 @@
 function init()
 {
 	let scrollBoxObject;
-	scrollbox = document.getElementById('scrollbox');
 	scrollBoxObject = scrollbox.boxObject.QueryInterface(Ci.nsIScrollBoxObject);
 
 	// window resize stop listener
@@ -288,7 +287,7 @@ function init()
 
 	mainWindow.addEventListener('keydown', closeLaunchpad, false);
 	window.addEventListener('beforeunload', function(e) mainWindow.removeEventListener('keydown', closeLaunchpad), false);
-	document.getElementById(CONTAINER_ID).addEventListener('mousedown', function(aEvent)
+	container.addEventListener('mousedown', function(aEvent)
 	{
 		if (mainWindow.gURLBar.getAttribute('focused') == 'true')
 		{

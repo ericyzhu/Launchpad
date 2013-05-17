@@ -51,3 +51,7 @@
     height: 0;
     overflow: hidden;
 }
+
+#launchpad-mozest-org-hidden-window browser
+{
+}

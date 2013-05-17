@@ -11,6 +11,7 @@ Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 
 let {WindowObserver} = require('WindowObserver');
 let {FileUtils} = require('FileUtils');
+let {BookmarkUtils} = require('BookmarkUtils');
 let {Prefs, PrefListener} = require('Prefs');
 let {Storage} = require('Storage');
 let {KeysMap : {KEYCODES, MODIFIERS}} = require('KeysMap');
@@ -19,6 +20,8 @@ let locale = Localization.getBundle('locale');
 let {id : ADDON_ID, STARTUP_REASON, OPTIONS_WIN_URI, OPTIONS_WIN_TYPE, MAIN_WIN_URI, SKIN_DIR_URI} = addonData;
 let styleSheetService = Cc['@mozilla.org/content/style-sheet-service;1'].getService(Ci.nsIStyleSheetService);
 let styleSheetURI = Services.io.newURI(SKIN_DIR_URI + 'browser.css', null, null)
+let alertsService = Cc['@mozilla.org/alerts-service;1'].getService(Ci.nsIAlertsService);
+let alertIcon = SKIN_DIR_URI + 'icons/logo.png';
 
 function elementSelector(aDocument, aID, aQueryAll)
 {
@@ -282,6 +285,33 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			this.resize();
 			aWindow.addEventListener('resize', this.resize, false);
 			aWindow.ToggleLaunchpadWindow = this.toggle.bind(this);
+			aWindow.AddPageToLaunchpad = function()
+			{
+				try
+				{
+					let window = gBrowser.selectedBrowser.contentWindow;
+					let bookmark =
+					{
+						uri      : window.location.href,
+						title    : window.document.title,
+						type     : BookmarkUtils.TYPE_BOOKMARK,
+						index    : BookmarkUtils.DEFAULT_INDEX,
+						folderID : Prefs.bookmarksFolderID
+					};
+					BookmarkUtils.addBookmark(bookmark, function()
+					{
+						try
+						{
+							alertsService.showAlertNotification(alertIcon,
+								subString(bookmark.title != '' ? bookmark.title : bookmark.uri, 48),
+								locale.pageAddedNotification,
+								false, '', null, 'Firefox Extenstion Notification: Launchpad'
+							);
+						} catch (e) {}
+
+					});
+				} catch (e) {}
+			};
 
 			return this;
 		},
@@ -289,6 +319,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		{
 			aWindow.removeEventListener('resize', this.resize, false);
 			delete aWindow.ToggleLaunchpadWindow;
+			delete aWindow.AddPageToLaunchpad;
 			this.window.parentNode.removeChild(this.window);
 			this.resize = null;
 		}
@@ -405,58 +436,82 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	//create keyset
 	let keyset =
 	{
-		keyset : null,
-		key : null,
+		keysets : null,
 		_listener : null,
-		_reset : function()
-		{
-			let keyModifiers = [];
-			let keyKeycode = '';
-			let {modifiers, keycode} = Prefs.openLaunchdShortcut;
-			modifiers = modifiers
-				? (Array.isArray(modifiers) ? modifiers : [])
-				: [];
-
-			keycode = keycode
-				? parseInt(keycode)
-				: 0;
-
-
-			for (let i = 0; i < modifiers.length; i++)
-			{
-				let [keyName] = MODIFIERS[modifiers[i]];
-				keyModifiers.push(keyName);
-			}
-
-			if (keycode && KEYCODES[keycode])
-			{
-				let [constantString] = KEYCODES[keycode];
-				keyKeycode = constantString;
-			}
-
-			try
-			{
-				this.keyset.parentNode.removeChild(this.keyset);
-			} catch (e) {}
-
-			this.keyset = document.createElement('keyset');
-			this.key = document.createElement('key');
-			this.key.setAttribute('id', 'launchpad-mozest-org-key');
-			this.key.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
-			this.key.setAttribute('modifiers', keyModifiers.join(','));
-			this.key.setAttribute('keycode', keyKeycode);
-			this.keyset.appendChild(this.key);
-			document.getElementById('main-window').appendChild(this.keyset);
-		},
 		init : function()
 		{
+			let openLaunchdShortcutKeyset, addPageToLaunchpadShortcutKeyset;
+			openLaunchdShortcutKeyset = new createKeyset('openLaunchdShortcut', 'ToggleLaunchpadWindow');
+			addPageToLaunchpadShortcutKeyset = new createKeyset('addPageToLaunchpadShortcut', 'AddPageToLaunchpad');
+			this.keysets = [openLaunchdShortcutKeyset, addPageToLaunchpadShortcutKeyset];
+
 			this._listener = function(aName)
 			{
-				aName == 'openLaunchdShortcut' && this._reset();
-			}.bind(this);
+				switch (aName)
+				{
+					case 'openLaunchdShortcut':
+						openLaunchdShortcutKeyset.reset();
+						break;
+
+					case 'addPageToLaunchpadShortcut':
+						addPageToLaunchpadShortcutKeyset.reset();
+						break;
+				}
+			};
 
 			PrefListener.add(this._listener);
-			this._reset();
+
+			function createKeyset(aPrefName, aCommand)
+			{
+				let prefName, keyset;
+				prefName = aPrefName;
+				this.remove = function()
+				{
+					try
+					{
+						keyset.parentNode.removeChild(keyset);
+					} catch (e) {}
+				};
+				this.reset = function()
+				{
+					let keyModifiers = [];
+					let keyKeycode = '';
+					let {modifiers, keycode} = Prefs[prefName];
+					modifiers = modifiers
+						? (Array.isArray(modifiers) ? modifiers : [])
+						: [];
+
+					keycode = keycode
+						? parseInt(keycode)
+						: 0;
+
+					for (let i = 0; i < modifiers.length; i++)
+					{
+						let [keyName] = MODIFIERS[modifiers[i]];
+						keyModifiers.push(keyName);
+					}
+
+					if (keycode && KEYCODES[keycode])
+					{
+						let [constantString] = KEYCODES[keycode];
+						keyKeycode = constantString;
+					}
+
+					this.remove();
+
+					keyset = document.createElement('keyset');
+					let key = document.createElement('key');
+					key.setAttribute('id', 'launchpad-mozest-org-' + prefName);
+					key.setAttribute('oncommand', aCommand + '();');
+					key.setAttribute('modifiers', keyModifiers.join(','));
+					key.setAttribute('keycode', keyKeycode);
+					keyset.appendChild(key);
+					mainWindow.appendChild(keyset);
+				};
+				this.reset();
+				return this;
+			}
+
 			return this;
 		},
 		uninit : function()
@@ -464,7 +519,11 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			PrefListener.remove(this._listener);
 			try
 			{
-				this.keyset.parentNode.removeChild(this.keyset);
+				for (let i = 0; i < this.keysets.length; i++)
+				{
+					this.keysets[i].remove();
+				}
+				this.keysets = null;
 			} catch (e) {}
 			this._listener = null;
 		}
@@ -494,3 +553,24 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 
 	aWindow.addEventListener('unload', onUnload, false);
 });
+
+function subString(aString, aLength)
+{
+	let pattern = /[^\x00-\xff]/g;
+	let length = aString.replace(pattern, '**').length;
+
+	let output = '';
+	let char;
+	let tempLength = 0;
+	for (let i = 0; i < aString.length; i++)
+	{
+		char = aString.charAt(i).toString();
+		if (char.match(pattern) == null) tempLength++;
+		else tempLength += 2;
+		if (tempLength > aLength) break;
+		output += char;
+	}
+	if (length > aLength) output += '...';
+
+	return output;
+}

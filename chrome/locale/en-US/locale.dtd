@@ -27,5 +27,6 @@
 
 <!ENTITY options.WindowTitle      "Perferences">
 <!ENTITY options.openLaunchpad    "Open Launchpad: ">
+<!ENTITY options.addPageToLaunchpad "Add page to Launchpad: ">
 <!ENTITY options.setAsHomepage    "Set Launchpad as homepage">
 <!ENTITY options.loadInNewtabPage "Load Launchpad in new tab page">

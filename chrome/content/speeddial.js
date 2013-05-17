@@ -8,8 +8,7 @@
 
 Launchpad.speeddial = (function()
 {
-	let speeddial, speeddialItem, folderID, bookmarkIndexes, buttonIndexes, listeners, dialpad, button, addbuttonEl, windowResizeEvent,
-		bookmarkLength, livemarkLength, folderLength, separatorLength;
+	let speeddial, speeddialItem, folderID, bookmarkIndexes, buttonIndexes, listeners, dialpad, button, addbuttonEl, windowResizeEvent;
 
 	folderID = null;
 	listeners =
@@ -29,7 +28,7 @@ Launchpad.speeddial = (function()
 
 	let iframe = document.createElementNS(HTML_NAMESPACE, 'iframe');
 	iframe.style.display = 'none';
-	document.getElementById(CONTAINER_ID).appendChild(iframe);
+	container.appendChild(iframe);
 	iframe.contentWindow.document.open();
 	iframe.contentWindow.document.write('<script>parent.speeddialArray = Array;<\/script>');
 	iframe.contentWindow.document.close();

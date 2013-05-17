@@ -139,8 +139,9 @@ exports.Snapshot =
 			let [uri, callbacks] = queue[0];
 			let timer;
 			let browser = browserDocument.createElement('browser');
-			browser.width = this.DEFAULT_WIDTH;
-			browser.height = this.DEFAULT_HEIGHT;
+			browser.style.width = this.DEFAULT_WIDTH + 'px';
+			browser.style.height = this.DEFAULT_HEIGHT + 'px';
+			browser.style.overflow = 'hidden';
 			browser.setAttribute('type', 'content');
 			browser.setAttribute('disablehistory', true);
 			hiddenWindow.appendChild(browser);
@@ -156,7 +157,7 @@ exports.Snapshot =
 			let cleanAndContinue = function()
 			{
 				browser.removeEventListener('load', onload, true);
-				browser.parentNode.removeChild(browser);
+				browser.parentNode && browser.parentNode.removeChild(browser);
 				queue.splice(0, 1);
 				continueQueue();
 			}.bind(this);
@@ -183,7 +184,8 @@ exports.Snapshot =
 				let width = pageWidth + sbWidth;
 				let height = pageHeight + sbHeight;
 
-				window.resizeTo(width, height);
+				browser.style.width = width + 'px';
+				browser.style.height = height + 'px';
 
 				let canvas = window.document.createElementNS(HTML_NAMESPACE, 'canvas');
 

@@ -11,15 +11,28 @@ let {Prefs, PrefListener} = require('Prefs');
 let {Localization} = require('Localization');
 let locale = Localization.getBundle('locale');
 
+const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 const OS = Services.appinfo.OS;
 
-(function()
+function createkeystrokeRecorder(aControl)
 {
-	let keystrokeRecorderInput = document.getElementById('keystroke-recorder-input');
-	let keystrokeRecorder = document.getElementById('keystroke-recorder');
-	let clearButton = document.getElementById('clear-shortcut');
-	let originalKeystrokeRecorderValue = '';
-	keystrokeRecorder.placeholder = locale.clickToRecordShortcut;
+	let keystrokeRecorderDisplay, keystrokeRecorderInput, clearButton, prefName, originalKeystrokeRecorderValue = '';
+
+	prefName = aControl.getAttribute('prefname');
+	keystrokeRecorderDisplay = document.createElementNS(HTML_NAMESPACE, 'input');
+	keystrokeRecorderDisplay.id = prefName;
+	keystrokeRecorderDisplay.placeholder = locale.clickToRecordShortcut;
+	keystrokeRecorderDisplay.classList.add('keystroke-recorder-display');
+
+	keystrokeRecorderInput = document.createElementNS(HTML_NAMESPACE, 'input');
+	keystrokeRecorderInput.classList.add('keystroke-recorder-input');
+
+	clearButton = document.createElementNS(HTML_NAMESPACE, 'img');
+	clearButton.setAttribute('src', 'chrome://launchpad-mozest-org/skin/icons/clear.svg');
+
+	aControl.appendChild(keystrokeRecorderDisplay);
+	aControl.appendChild(keystrokeRecorderInput);
+	aControl.appendChild(clearButton);
 
 	let modifiers = [];
 	let keycode;
@@ -52,7 +65,7 @@ const OS = Services.appinfo.OS;
 			updateDisplay({modifiers : modifiers, keycode : keycode});
 			if (keycode)
 			{
-				Prefs.openLaunchdShortcut =
+				Prefs[prefName] =
 				{
 					modifiers : modifiers,
 					keycode  : keycode
@@ -76,30 +89,30 @@ const OS = Services.appinfo.OS;
 
 	keystrokeRecorderInput.addEventListener('blur', function(e)
 	{
-		( ! keycode) && (keystrokeRecorder.setAttribute('value', ''));
+		( ! keycode) && (keystrokeRecorderDisplay.setAttribute('value', ''));
 
-		if (keystrokeRecorder.getAttribute('value') && keystrokeRecorder.getAttribute('value') != originalKeystrokeRecorderValue)
+		if (keystrokeRecorderDisplay.getAttribute('value') && keystrokeRecorderDisplay.getAttribute('value') != originalKeystrokeRecorderValue)
 		{
-			originalKeystrokeRecorderValue = keystrokeRecorder.getAttribute('value');
+			originalKeystrokeRecorderValue = keystrokeRecorderDisplay.getAttribute('value');
 		}
 		else
 		{
-			keystrokeRecorder.setAttribute('value', originalKeystrokeRecorderValue);
+			keystrokeRecorderDisplay.setAttribute('value', originalKeystrokeRecorderValue);
 		}
-		keystrokeRecorder.placeholder = locale.clickToRecordShortcut;
-		keystrokeRecorder.setAttribute('focused', false);
+		keystrokeRecorderDisplay.placeholder = locale.clickToRecordShortcut;
+		keystrokeRecorderDisplay.setAttribute('focused', false);
 		modifiers = [];
 		keycode = null;
 		pressedKeys = [];
 		updateClearButton();
-		keystrokeRecorder.removeAttribute('focused');
+		keystrokeRecorderDisplay.removeAttribute('focused');
 	}, false);
 
-	keystrokeRecorder.addEventListener('mousedown', function(e)
+	keystrokeRecorderDisplay.addEventListener('mousedown', function(e)
 	{
 		preventDefaultEvent(e);
 
-		if (keystrokeRecorder.hasAttribute('focused'))
+		if (keystrokeRecorderDisplay.hasAttribute('focused'))
 		{
 			return;
 		}
@@ -107,41 +120,41 @@ const OS = Services.appinfo.OS;
 		(e.button == 0) && onKeystrokeRecorderFocus(e);
 	}, false);
 
-	keystrokeRecorder.addEventListener('focus', onKeystrokeRecorderFocus, false);
+	keystrokeRecorderDisplay.addEventListener('focus', onKeystrokeRecorderFocus, false);
 
 	clearButton.addEventListener('click', function(e)
 	{
-		Prefs.openLaunchdShortcut = null;
+		Prefs[prefName] = null;
 		updateDisplay(null);
 		updateClearButton();
 	}, false);
 
-	keystrokeRecorder.addEventListener('contextmenu', preventDefaultEvent, false);
+	keystrokeRecorderDisplay.addEventListener('contextmenu', preventDefaultEvent, false);
 	window.addEventListener('blur', function(e) keystrokeRecorderInput.blur(), false);
 
-	updateDisplay(Prefs.openLaunchdShortcut);
+	updateDisplay(Prefs[prefName]);
 	updateClearButton();
 
 	PrefListener.add(listener);
 	window.addEventListener('unload', function(e) PrefListener.remove(listener), false);
 
-	window.addEventListener('load', function(e)
+	window.addEventListener('click', function()
 	{
-		window.setTimeout(function()
-		{
-			keystrokeRecorder.blur();
-			keystrokeRecorderInput.blur();
-
-		}, 10);
+		keystrokeRecorderInput.blur();
 	}, false);
 
+	window.setTimeout(function()
+	{
+		keystrokeRecorderInput.blur();
+
+	}, 10);
 
 	function listener(aName, aValue)
 	{
 		switch (aName)
 		{
-			case 'openLaunchdShortcut':
-				updateDisplay(Prefs.openLaunchdShortcut);
+			case prefName:
+				updateDisplay(Prefs[prefName]);
 				updateClearButton();
 				break;
 		}
@@ -150,11 +163,11 @@ const OS = Services.appinfo.OS;
 	function onKeystrokeRecorderFocus(e)
 	{
 		preventDefaultEvent(e);
-		keystrokeRecorder.blur();
-		keystrokeRecorder.value && (originalKeystrokeRecorderValue = keystrokeRecorder.getAttribute('value'));
-		keystrokeRecorder.setAttribute('focused', true);
+		keystrokeRecorderDisplay.blur();
+		keystrokeRecorderDisplay.value && (originalKeystrokeRecorderValue = keystrokeRecorderDisplay.getAttribute('value'));
+		keystrokeRecorderDisplay.setAttribute('focused', true);
 		keystrokeRecorderInput.focus();
-		keystrokeRecorder.placeholder = locale.typeShortcut;
+		keystrokeRecorderDisplay.placeholder = locale.typeShortcut;
 		updateDisplay(null);
 		updateClearButton();
 	}
@@ -192,17 +205,17 @@ const OS = Services.appinfo.OS;
 
 		if (OS == 'Darwin')
 		{
-			keystrokeRecorder.setAttribute('value', strings.join(''));
+			keystrokeRecorderDisplay.setAttribute('value', strings.join(''));
 		}
 		else
 		{
-			keystrokeRecorder.setAttribute('value', strings.join('+'));
+			keystrokeRecorderDisplay.setAttribute('value', strings.join('+'));
 		}
 	}
 
 	function updateClearButton()
 	{
-		if (keystrokeRecorderInput.getAttribute('focused') || ( ! keystrokeRecorder.getAttribute('value') && ! keystrokeRecorderInput.getAttribute('focused')))
+		if (keystrokeRecorderInput.getAttribute('focused') || ( ! keystrokeRecorderDisplay.getAttribute('value') && ! keystrokeRecorderInput.getAttribute('focused')))
 		{
 			clearButton.style.display = 'none';
 		}
@@ -220,24 +233,29 @@ const OS = Services.appinfo.OS;
 
 	(function()
 	{
-		let value = keystrokeRecorder.getAttribute('value');
-		Object.defineProperty(keystrokeRecorder, 'value',
-		{
-			get : function() value,
-			set : function(aValue)
+		let value = keystrokeRecorderDisplay.getAttribute('value');
+		Object.defineProperty(keystrokeRecorderDisplay, 'value',
 			{
-				value = aValue;
-				keystrokeRecorder.setAttribute('value', aValue);
+				get : function() value,
+				set : function(aValue)
+				{
+					value = aValue;
+					keystrokeRecorderDisplay.setAttribute('value', aValue);
 
-				if (keystrokeRecorder.getAttribute('focused'))
-				{
-					keystrokeRecorder.placeholder = locale.typeShortcut;
+					if (keystrokeRecorderDisplay.getAttribute('focused'))
+					{
+						keystrokeRecorderDisplay.placeholder = locale.typeShortcut;
+					}
+					else
+					{
+						keystrokeRecorderDisplay.placeholder = locale.clickToRecordShortcut;
+					}
 				}
-				else
-				{
-					keystrokeRecorder.placeholder = locale.clickToRecordShortcut;
-				}
-			}
-		});
+			});
 	})();
-})();
+}
+
+window.addEventListener('load', function()
+{
+	Array.prototype.forEach.call(document.querySelectorAll('vbox[class="setting-box keystroke-recorder"]'), createkeystrokeRecorder);
+}, false);

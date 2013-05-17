@@ -63,7 +63,10 @@ let BookmarkUtils = exports.BookmarkUtils =
 			switch (aBookmarkInfo.type)
 			{
 				case this.TYPE_BOOKMARK:
-					bookmarksService.insertBookmark(aBookmarkInfo.folderID, NetUtil.newURI(autocompleURI(aBookmarkInfo.uri)), aBookmarkInfo.index, aBookmarkInfo.title)
+					if (bookmarksService.insertBookmark(aBookmarkInfo.folderID, NetUtil.newURI(autocompleURI(aBookmarkInfo.uri)), aBookmarkInfo.index, aBookmarkInfo.title))
+					{
+						aCallback && aCallback();
+					}
 					break;
 
 				case this.TYPE_FOLDER:

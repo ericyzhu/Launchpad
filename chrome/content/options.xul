@@ -23,18 +23,18 @@
         <vbox pack="center">
             <box pack="center" id="logo"/>
             <hbox pack="center">
-                <grid id="group">
+                <grid>
                     <columns>
                         <column flex="1"/>
                     </columns>
                     <rows>
                         <row align="center">
-                            <label control="keystroke-recorder" value="&options.openLaunchpad;"/>
-                            <box class="setting-box">
-                                <html:input id="keystroke-recorder"/>
-                                <html:input id="keystroke-recorder-input"/>
-                                <html:img id="clear-shortcut" class="input-clear-button" width="16" height="16" src="chrome://launchpad-mozest-org/skin/icons/clear.svg"/>
-                            </box>
+                            <label control="openLaunchdShortcut" value="&options.openLaunchpad;"/>
+                            <vbox class="setting-box keystroke-recorder" prefname="openLaunchdShortcut"/>
+                        </row>
+                        <row align="center">
+                            <label control="addPageToLaunchpadShortcut" value="&options.addPageToLaunchpad;"/>
+                            <vbox class="setting-box keystroke-recorder" prefname="addPageToLaunchpadShortcut"/>
                         </row>
                         <row>
                             <spacer id="spacer"/>

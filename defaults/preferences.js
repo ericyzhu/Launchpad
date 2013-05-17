@@ -20,3 +20,4 @@ pref('extensions.launchpad-mozest-org.dialpadButtonRatioMax', 2.0);
 pref('extensions.launchpad-mozest-org.dialpadButtonRatioAutosizeMin', 0.6);
 pref('extensions.launchpad-mozest-org.dialpadButtonRatioAutosizeMax', 1.3);
 pref('extensions.launchpad-mozest-org.openLaunchdShortcut', {});
+pref('extensions.launchpad-mozest-org.addPageToLaunchpadShortcut', {});

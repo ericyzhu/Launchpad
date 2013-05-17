@@ -94,21 +94,6 @@ function isInt(aValue)
 	return typeof aValue === 'number' && aValue % 1 == 0;
 }
 
-Array.prototype.indexOf = function(aSearch, aFromIndex)
-{
-	aFromIndex = isInt(aFromIndex) ? isInt(aFromIndex) : 0;
-
-	if (aFromIndex < this.length)
-	{
-		for (let i = 0; i < this.length; i++)
-		{
-			if (this[i] === aSearch) return i;
-		}
-	}
-
-	return -1;
-};
-
 let mainWindow = window.QueryInterface(Ci.nsIInterfaceRequestor)
 	.getInterface(Ci.nsIWebNavigation)
 	.QueryInterface(Ci.nsIDocShellTreeItem)

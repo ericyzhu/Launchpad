@@ -48,11 +48,11 @@ vbox.keystroke-recorder
 input.keystroke-recorder-display
 {
     text-align: center;
-    font-size: 100%;
+    font-size: 93%;
     border-radius: 20px !important;
     border: 1px solid rgba(0,0,0,.3);
     background-color: rgb(255,255,255);
-    padding: 2px 4px;
+    padding: 3px 4px;
     cursor: default !important;
     -moz-appearance: none;
     width: 280px;

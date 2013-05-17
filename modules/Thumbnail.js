@@ -13,6 +13,7 @@ let {Utils} = require('Utils');
 let imgCache = Cc['@mozilla.org/image/tools;1'].getService(Ci.imgITools).getImgCacheForDocument(null);
 
 let expriesUpdateQueue = [];
+let listeners = [];
 exports.Thumbnail =
 {
 	get STATUS_SUCCESS()         0,
@@ -22,11 +23,20 @@ exports.Thumbnail =
 	get TYPE_BOOKMARK()        'bookmark',
 	get TYPE_HISTORY()         'history',
 
-	getFileURIForBookmark : function(aURI, aFarce, aCallback)
+	_getFileURIForBookmarkQueue : [],
+
+	getFileURIForBookmark : function(aURI, aFarce, aNeedSyncMetadata)
 	{
 		let leafName = this.getLeafNameForURI(aURI);
+		let index = this._getFileURIForBookmarkQueue.indexOf(leafName);
+		if (index >= 0) return;
+		index = this._getFileURIForBookmarkQueue.push(leafName) - 1;
+
 		let file = this.getFile(this.TYPE_BOOKMARK, leafName);
 		let lastModifiedTime = file.exists() ? file.lastModifiedTime : 0;
+		let listener = listeners[leafName];
+
+		berore(leafName, file);
 
 		let callback = function(aStatus, aFile, aDocumentTitle)
 		{
@@ -46,25 +56,27 @@ exports.Thumbnail =
 								}
 								catch (e) {}
 							}
-
-							aCallback(this.STATUS_SUCCESS, this.getFileURI(aFile) + '?' + aFile.lastModifiedTime, aMetadata, aFile);
+							complete(aStatus, this.getFileURI(aFile) + '?' + aFile.lastModifiedTime, aMetadata, aFile, aNeedSyncMetadata);
 						}
 						else
 						{
-							//this.getFileURIForBookmark(aURI, true, aCallback);
+							//this.getFileURIForBookmark(aURI, true, aSyncTitle);
 						}
 					}
 					else
 					{
-						aCallback(aStatus, null, null, null);
+						complete(aStatus, null, null, null);
 					}
 
 				}.bind(this));
 			}
 			else
 			{
-				aCallback(aStatus, null, null, null);
+				complete(aStatus, null, null, null);
 			}
+
+			this._getFileURIForBookmarkQueue.splice(index, 1);
+
 		}.bind(this);
 
 		if ( ! file.exists() || aFarce)
@@ -88,6 +100,36 @@ exports.Thumbnail =
 		else
 		{
 			callback(this.STATUS_SUCCESS, file);
+		}
+
+		function berore(aLeafName, aFile)
+		{
+			try
+			{
+				if (listener)
+				{
+					for (let i = 0; i < listener.length; i++)
+					{
+						let callback = listener[i];
+						callback && callback.berore && callback.berore(aLeafName, aFile);
+					}
+				}
+			} catch(e) {}
+		}
+
+		function complete(aStatus, aFileURI, aMetadata, aFile, aNeedSyncMetadata)
+		{
+			try
+			{
+				if (listener)
+				{
+					for (let i = 0; i < listener.length; i++)
+					{
+						let callback = listener[i];
+						callback && callback.complete && callback.complete(aStatus, aFileURI, aMetadata, aFile, aNeedSyncMetadata);
+					}
+				}
+			} catch(e) {}
 		}
 	},
 
@@ -325,5 +367,42 @@ exports.Thumbnail =
 		{
 			aCallback(this.STATUS_IO_ERROR, null);
 		}
+	},
+
+	listener :
+	{
+		add : function(aListener)
+		{
+			if ( ! aListener || ! aListener.uri || ! aListener.callback) return;
+
+			let leafName = exports.Thumbnail.getLeafNameForURI(aListener.uri);
+			if ( ! listeners[leafName] || ! Array.isArray(listeners[leafName])) listeners[leafName] = [];
+			listeners[leafName].push(aListener.callback);
+		},
+		remove : function(aListener)
+		{
+			if ( ! aListener || ! aListener.uri) return;
+
+			let leafName = exports.Thumbnail.getLeafNameForURI(aListener.uri);
+			if ( ! listeners[leafName]) return;
+
+			if (aListener.callback)
+			{
+				let index = listeners[leafName].indexOf(aListener.callback);
+				if (index >= 0)
+				{
+					listeners[leafName].splice(index, 1);
+				}
+			}
+			else
+			{
+				delete listeners[leafName];
+			}
+		}
 	}
 }
+
+onShutdown.add(function()
+{
+	listeners = [];
+});

@@ -130,7 +130,7 @@ Launchpad.speeddial = (function()
 		{
 			if (aValue == uri) return uri;
 			uri = aValue;
-			this.element.updateThumbnail();
+			this.element.updateURI();
 			return uri;
 		});
 		item.remove = function()
@@ -433,6 +433,8 @@ Launchpad.speeddial = (function()
 
 		this.load(Prefs.bookmarksFolderID);
 
+		window.addEventListener('beforeunload', function() button.removeAll(), false);
+
 		window.addEventListener('resize', function() button.dimensions.update(true), false);
 
 		PrefListener.add(prefHandler);
@@ -575,7 +577,6 @@ Launchpad.speeddial = (function()
 			}
 
 			window.addEventListener('resize', updateButtonPositon, false);
-
 
 			//
 			let TabsBar = mainWindow.document.getElementById('TabsToolbar');
@@ -959,17 +960,20 @@ Launchpad.speeddial = (function()
 
 		button.createElement = function(aBookmark)
 		{
-			let node, buttonEl, thumbnailEl, removeButtonEl, resizeStopListener, events;
+			let node, buttonEl, thumbnailEl, removeButtonEl, resizeStopListener, events, thumbnailListener, uri;
 			node           = this.fragment.cloneNode(true);
 			buttonEl       = node.firstChild;
 			thumbnailEl    = buttonEl.querySelector('.' + DIALPAD_BUTTON_THUMBNAIL_CLASS);
 			removeButtonEl = buttonEl.querySelector('.' + DIALPAD_BUTTON_REMOVE_BUTTON_CLASS);
 
+			buttonEl.setAttribute('loading', false);
 			buttonEl.setAttribute('draggable', true);
 			buttonEl.setAttribute('dragged',   false);
 			buttonEl.__defineGetter__('bookmark', function() aBookmark);
 			buttonEl.__defineGetter__('index', function() this.bookmark.buttonIndex);
 			buttonEl.__defineGetter__('thumbnailElement', function() thumbnailEl);
+			buttonEl.__defineGetter__('uri', function() uri);
+
 			buttonEl.updateDimensions = function()
 			{
 				if (this.getAttribute('dragged') == 'true' || this.index < 0) return;
@@ -981,36 +985,27 @@ Launchpad.speeddial = (function()
 				this.style.width  = innerWidth  + 'px';
 				this.style.height = innerHeight + 'px';
 			};
+			buttonEl.updateURI = function()
+			{
+				uri = this.bookmark.uri;
+				Thumbnail.listener.remove(thumbnailListener);
+				thumbnailListener = generateThumbnailListener();
+				Thumbnail.listener.add(thumbnailListener);
+				this.updateThumbnail(false, true);
+			};
 			buttonEl.updateTitle = function()
 			{
 				let {title} = this.bookmark;
 				this.querySelector('.' + DIALPAD_BUTTON_TITLE_CLASS).textContent = title != '' ? title : locale.untitled;
 			};
-			buttonEl.updateThumbnail = function(aForce)
+
+			buttonEl.updateThumbnail = function(aForce, aNeedSyncMetadata)
 			{
-				let {id, title, uri} = this.bookmark;
-				let loaderEl = this.querySelector('.' + DIALPAD_BUTTON_LOADING_CLASS);
-				loaderEl.style.display = 'block';
-				Thumbnail.getFileURIForBookmark(uri, aForce, function(aStatus, aURI, aMetadata, aFile)
-				{
-					loaderEl.style.display = 'none';
-					if (aStatus == Thumbnail.STATUS_SUCCESS)
-					{
-						thumbnailEl.style.backgroundImage = 'url("' + aURI + '")';
-						if (title == '' && aMetadata.title != '')
-						{
-							speeddial.update(
-							{
-								id    : id,
-								title : aMetadata.title,
-								type  : speeddial.BOOKMARK_TYPE_BOOKMARK
-							});
-						}
-					}
-				});
+				Thumbnail.getFileURIForBookmark(uri, aForce, aNeedSyncMetadata);
 			};
 			buttonEl.remove = function()
 			{
+				Thumbnail.listener.remove(thumbnailListener);
 				window.resizeStopListener.remove(resizeStopListener);
 
 				let removeButton, timer;
@@ -1034,6 +1029,7 @@ Launchpad.speeddial = (function()
 
 			buttonEl.removeImmediate = function()
 			{
+				Thumbnail.listener.remove(thumbnailListener);
 				window.resizeStopListener.remove(resizeStopListener);
 				this.parentNode && this.parentNode.removeChild(this);
 			};
@@ -1070,10 +1066,49 @@ Launchpad.speeddial = (function()
 				speeddial.remove(buttonEl.bookmark.id);
 			}, true);
 
+			uri = buttonEl.bookmark.uri;
+
+			thumbnailListener = generateThumbnailListener();
+			Thumbnail.listener.add(thumbnailListener);
+
 			buttonEl.updateTitle();
 			buttonEl.updateThumbnail();
 
 			dialpad.element.appendChild(node);
+
+			function generateThumbnailListener()
+			{
+				return {
+					uri      : uri,
+					callback :
+					{
+						berore   : function(aLeafName, aFile)
+						{
+							buttonEl.setAttribute('loading', true);
+						},
+						complete : function(aStatus, aFileURI, aMetadata, aFile, aNeedSyncMetadata)
+						{
+							buttonEl.setAttribute('loading', false);
+							if (aStatus == Thumbnail.STATUS_SUCCESS)
+							{
+								let {id, title, uri} = buttonEl.bookmark;
+								thumbnailEl.style.backgroundImage = 'url("' + aFileURI + '")';
+
+								if (aNeedSyncMetadata || (title == '' && aMetadata.title != ''))
+								{
+
+									speeddial.update(
+									{
+										id    : id,
+										title : aMetadata.title,
+										type  : speeddial.BOOKMARK_TYPE_BOOKMARK
+									});
+								}
+							}
+						}
+					}
+				}
+			}
 
 			return buttonEl;
 		};
@@ -1117,7 +1152,7 @@ Launchpad.speeddial = (function()
 			{
 				if (aEvent.button == 0)
 				{
-					mainWindow.openLinkIn(aEvent.currentTarget.bookmark.uri, 'current', {relatedToCurrent : false});
+					mainWindow.openLinkIn(aEvent.currentTarget.uri, 'current', {relatedToCurrent : false});
 					mainWindow.ToggleLaunchpadBox(false);
 				}
 				aEvent.preventDefault();
@@ -1135,7 +1170,7 @@ Launchpad.speeddial = (function()
 
 				if (aEvent.button == 1)
 				{
-					mainWindow.openLinkIn(aEvent.currentTarget.bookmark.uri, 'tab', {relatedToCurrent : true});
+					mainWindow.openLinkIn(aEvent.currentTarget.uri, 'tab', {relatedToCurrent : true});
 				}
 			},
 

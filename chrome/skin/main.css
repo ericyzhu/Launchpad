@@ -241,8 +241,19 @@ input
     position: absolute;
     left: 18px;
     bottom: 18px;
-    display: none;
     opacity: .75;
+    display: none;
+}
+
+.dialpad-button-container[loading="true"] .dialpad-button-loading
+{
+    display: block;
+
+}
+.dialpad-button-container[loading="false"] .dialpad-button-loading
+{
+    display: none;
+
 }
 
 div.range-slider

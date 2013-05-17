@@ -17,7 +17,7 @@ let {Storage} = require('Storage');
 let {KeysMap : {KEYCODES, MODIFIERS}} = require('KeysMap');
 let {Localization} = require('Localization');
 let locale = Localization.getBundle('locale');
-let {id : ADDON_ID, STARTUP_REASON, OPTIONS_WIN_URI, OPTIONS_WIN_TYPE, MAIN_WIN_URI, SKIN_DIR_URI} = addonData;
+let {id : ADDON_ID, STARTUP_REASON, OPTIONS_WIN_URI, OPTIONS_WIN_TYPE, MAIN_WIN_URI, SKIN_DIR_URI, PACKAGE_NAME} = addonData;
 let styleSheetService = Cc['@mozilla.org/content/style-sheet-service;1'].getService(Ci.nsIStyleSheetService);
 let styleSheetURI = Services.io.newURI(SKIN_DIR_URI + 'browser.css', null, null)
 let alertsService = Cc['@mozilla.org/alerts-service;1'].getService(Ci.nsIAlertsService);
@@ -183,7 +183,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 
 	// add button to toolbar
 	let button = document.createElement('toolbarbutton');
-	button.setAttribute('id', 'launchpad-mozest-org-toolbar-button');
+	button.setAttribute('id', PACKAGE_NAME + '-toolbar-button');
 	button.setAttribute('label', locale.toolbarButtonLabel);
 	button.setAttribute('tooltiptext', locale.toolbarButtonTooltip);
 	button.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
@@ -254,10 +254,10 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			this.mainWindowContent = document.getElementById('content');
 
 			this.window = document.createElement('box');
-			this.window.setAttribute('id', 'launchpad-mozest-org-window');
+			this.window.setAttribute('id', PACKAGE_NAME + '-window');
 
 			this.browser = document.createElement('browser');
-			this.browser.setAttribute('id', 'launchpad-mozest-org-browser');
+			this.browser.setAttribute('id', PACKAGE_NAME + '-browser');
 			this.browser.setAttribute('type', 'content');
 			this.browser.setAttribute('disablehistory', true);
 			this.browser.setAttribute('transparent', 'transparent');
@@ -267,7 +267,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			this.mainWindowContent.appendChild(this.window);
 
 			let hiddenWindow = document.createElement('box');
-			hiddenWindow.setAttribute('id', 'launchpad-mozest-org-hidden-window');
+			hiddenWindow.setAttribute('id', PACKAGE_NAME + '-hidden-window');
 			this.mainWindowContent.appendChild(hiddenWindow);
 
 			this.resize = function()
@@ -335,7 +335,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		{
 			let DOMWindow = aProgress.DOMWindow;
 
-			if (DOMWindow == gBrowser.selectedTab.linkedBrowser.contentWindow)
+			if (DOMWindow == gBrowser.selectedBrowser.contentWindow)
 			{
 				let readyState = DOMWindow.document.readyState;
 				let uri = aURI.spec;
@@ -416,7 +416,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			{
 				let window = aEvent.originalTarget.defaultView;
 
-				if (window == gBrowser.selectedTab.linkedBrowser.contentWindow && window.location.href == 'about:blank')
+				if (window == gBrowser.selectedBrowser.contentWindow && window.location.href == 'about:blank')
 				{
 					launchpadWindow.toggle(true, true);
 				}
@@ -433,7 +433,36 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		}
 	}.init();
 
-	//create keyset
+	let contextMenu =
+	{
+		menuitems : null,
+		init : function()
+		{
+			this.menuitems = [];
+
+			let menuitem;
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('id', PACKAGE_NAME + '-context-add-to-launchpad');
+			menuitem.setAttribute('oncommand', 'AddPageToLaunchpad();');
+			menuitem.setAttribute('label', locale.addThisPageToLaunchpad);
+
+			this.menuitems.push(menuitem);
+			document.getElementById('contentAreaContextMenu').insertBefore(menuitem, document.getElementById('context-bookmarkpage'));
+
+			return this;
+		},
+		uninit : function()
+		{
+			for (let i = 0; i < this.menuitems.length; i++)
+			{
+				let menuitem = this.menuitems[i];
+				menuitem.parentNode.removeChild(menuitem);
+			}
+			this.menuitems = null;
+		}
+	}.init();
+
+	// create keyset
 	let keyset =
 	{
 		keysets : null,
@@ -501,7 +530,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 
 					keyset = document.createElement('keyset');
 					let key = document.createElement('key');
-					key.setAttribute('id', 'launchpad-mozest-org-' + prefName);
+					key.setAttribute('id', PACKAGE_NAME + '-' + prefName);
 					key.setAttribute('oncommand', aCommand + '();');
 					key.setAttribute('modifiers', keyModifiers.join(','));
 					key.setAttribute('keycode', keyKeycode);
@@ -533,6 +562,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	{
 		removeButton(document, button);
 		keyset.uninit();
+		contextMenu.uninit();
 		gBrowserListener.uninit();
 		progressListener.uninit();
 		launchpadWindow.uninit();
@@ -543,6 +573,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	function onUnload()
 	{
 		keyset.uninit();
+		contextMenu.uninit();
 		gBrowserListener.uninit();
 		progressListener.uninit();
 		launchpadWindow.uninit();

@@ -351,7 +351,7 @@ function init()
 		}
 		else
 		{
-			mainWindow.ToggleLaunchpadWindow(false);
+			mainWindow.ToggleLaunchpadWindow();
 		}
 	}
 

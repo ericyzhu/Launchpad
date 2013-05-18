@@ -187,7 +187,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	button.setAttribute('label', locale.toolbarButtonLabel);
 	button.setAttribute('tooltiptext', locale.toolbarButtonTooltip);
 	button.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
-	button.setAttribute('onclick', 'checkForMiddleClick(this, event);');
 	button.classList.add('toolbarbutton-1');
 	button.classList.add('chromeclass-toolbar-additional');
 	elementSelector(document, 'navigator-toolbox').palette.appendChild(button);
@@ -199,13 +198,11 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		window : null,
 		browser : null,
 		mainWindowContent : null,
-		windowStage : null,
-		isBlankPage : null,
 		resize : null,
 		_open : function()
 		{
 			this.resize();
-			this.window.classList.add('open');
+			! this.window.classList.contains('open') && this.window.classList.add('open');
 			this.browser.focus();
 			if (aWindow.gURLBar.value == '')
 			{
@@ -215,32 +212,35 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		},
 		_close : function()
 		{
-			this.window.classList.remove('open');
+			this.window.classList.contains('open') && this.window.classList.remove('open');
 			this.browser.blur();
 			aWindow.gURLBar.blur();
 		},
-		toggle : function(aStage, aIsBlankPage)
+		toggle : function(aState)
 		{
-			if (typeof(aIsBlankPage) != 'undefined')
-			{
-				this.isBlankPage = aIsBlankPage == true;
-			}
+			let windowState = false;
 
-			if (typeof(aStage) != 'undefined')
+			if (typeof(aState) == 'undefined')
 			{
-				this.windowStage = aStage == true;
+				let {selectedTab, selectedBrowser : {contentWindow}} = gBrowser;
+				if (contentWindow.location.href == 'about:blank' && contentWindow.document.readyState == 'complete' &&
+				    ! selectedTab.hasAttribute('pending') && selectedTab.__launchpadFlagLoaded__)
+				{
+					if (this.window.classList.contains('open')) return;
+
+					windowState = true;
+				}
+				else
+				{
+					windowState = this.window.classList.contains('open') ? false : true;
+				}
 			}
 			else
 			{
-				this.windowStage = this.windowStage ? false : true;
+				windowState = aState == true;
 			}
 
-			if (this.isBlankPage)
-			{
-				this.windowStage = true;
-			}
-
-			if (this.windowStage)
+			if (windowState)
 			{
 				this._open();
 			}
@@ -325,6 +325,33 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		}
 	}.init();
 
+	let pageLoadListener =
+	{
+		appcontent : null,
+		onPageLoad : function(aEvent)
+		{
+			let {URL, defaultView} =  aEvent.originalTarget;
+			let {selectedTab, selectedBrowser} = gBrowser;
+			if (URL == 'about:blank' && defaultView == selectedBrowser.contentWindow && ! selectedTab.hasAttribute('pending'))
+			{
+				selectedTab.__launchpadFlagLoaded__ = true;
+				launchpadWindow.toggle(true);
+			}
+		},
+		init : function()
+		{
+			this.appcontent = document.getElementById('appcontent');
+			this.appcontent && this.appcontent.addEventListener('DOMContentLoaded', this.onPageLoad, true);
+
+			return this;
+		},
+		uninit : function()
+		{
+			this.appcontent && this.appcontent.removeEventListener('DOMContentLoaded', this.onPageLoad, true);
+			this.appcontent = null;
+		}
+	}.init();
+
 	// progress listener
 	let progressListener =
 	{
@@ -335,47 +362,13 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		{
 			let DOMWindow = aProgress.DOMWindow;
 
-			if (DOMWindow == gBrowser.selectedBrowser.contentWindow)
+			if (aURI.spec == 'about:blank' && DOMWindow.document.readyState == 'complete' && ! gBrowser.selectedTab.hasAttribute('pending') && gBrowser.selectedTab.__launchpadFlagLoaded__)
 			{
-				let readyState = DOMWindow.document.readyState;
-				let uri = aURI.spec;
-
-				if (gBrowser.selectedTab.hasAttribute('pending'))
-				{
-					this.pending = gBrowser.selectedTab.getAttribute('pending');
-					this.loadingURI = uri;
-
-					if (uri == 'about:blank')
-					{
-						launchpadWindow.toggle(true, true);
-					}
-					else
-					{
-						launchpadWindow.toggle(false, false);
-					}
-				}
-				else
-				{
-					if (this.pending)
-					{
-						if (this.loadingURI == uri)
-						{
-							this.pending = null;
-							this.loadingURI = null;
-						}
-					}
-					else
-					{
-						if (uri == 'about:blank' && (readyState == 'loading' || readyState == 'complete'))
-						{
-							launchpadWindow.toggle(true, true);
-						}
-						else
-						{
-							launchpadWindow.toggle(false, false);
-						}
-					}
-				}
+				launchpadWindow.toggle(true);
+			}
+			else
+			{
+				launchpadWindow.toggle(false);
 			}
 		},
 		onStateChange : function() {},
@@ -392,9 +385,9 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 				let DOMWindow = gBrowser.tabs[0].linkedBrowser.contentWindow;
 				let readyState = DOMWindow.document.readyState;
 
-				if (DOMWindow.location.href == 'about:blank' && (readyState == 'loading' || readyState == 'complete'))
+				if (DOMWindow.location.href == 'about:blank' && readyState == 'complete')
 				{
-					launchpadWindow.toggle(true, true);
+					launchpadWindow.toggle(true);
 				}
 			}
 
@@ -403,33 +396,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		uninit : function()
 		{
 			gBrowser.removeProgressListener(this);
-		}
-	}.init();
-
-	// gBrowser listener
-	let gBrowserListener =
-	{
-		_listener : null,
-		init : function()
-		{
-			this._listener = function(aEvent)
-			{
-				let window = aEvent.originalTarget.defaultView;
-
-				if (window == gBrowser.selectedBrowser.contentWindow && window.location.href == 'about:blank')
-				{
-					launchpadWindow.toggle(true, true);
-				}
-			}.bind(this);
-
-			gBrowser.addEventListener('load', this._listener, true);
-
-			return this;
-		},
-		uninit : function()
-		{
-			gBrowser.removeEventListener('load', this._listener, true);
-			this._listener = null;
 		}
 	}.init();
 
@@ -561,9 +527,9 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	function shutdownHandler()
 	{
 		removeButton(document, button);
+		pageLoadListener.uninit();
 		keyset.uninit();
 		contextMenu.uninit();
-		gBrowserListener.uninit();
 		progressListener.uninit();
 		launchpadWindow.uninit();
 		styleSheet.uninit();
@@ -572,9 +538,9 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 
 	function onUnload()
 	{
+		pageLoadListener.uninit();
 		keyset.uninit();
 		contextMenu.uninit();
-		gBrowserListener.uninit();
 		progressListener.uninit();
 		launchpadWindow.uninit();
 		onShutdown.remove(shutdownHandler);

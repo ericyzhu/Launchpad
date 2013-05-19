@@ -145,14 +145,11 @@ Storage.openConnection(FileUtils.getDataFile(['database.sqlite'], true),
 	}
 });
 
-WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
+WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 {
-	if (Prefs.firstrun == true)
-	{
-		Prefs.firstrun = false;
-		aWindow.openDialog(OPTIONS_WIN_URI, OPTIONS_WIN_TYPE, 'chrome,titlebar,centerscreen,dialog=yes');
-	}
+	let gBrowser = aWindow.getBrowser(), document = aWindow.document, mainWindow = document.getElementById('main-window');
 
+	// register style sheet
 	let styleSheet =
 	{
 		_isRegistered : function()
@@ -177,27 +174,11 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		}
 	}.init();
 
-	let gBrowser = aWindow.getBrowser();
-	let document = aWindow.document;
-	let mainWindow = document.getElementById('main-window');
-
-	// add button to toolbar
-	let button = document.createElement('toolbarbutton');
-	button.setAttribute('id', PACKAGE_NAME + '-toolbar-button');
-	button.setAttribute('label', locale.toolbarButtonLabel);
-	button.setAttribute('tooltiptext', locale.toolbarButtonTooltip);
-	button.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
-	button.classList.add('toolbarbutton-1');
-	button.classList.add('chromeclass-toolbar-additional');
-	elementSelector(document, 'navigator-toolbox').palette.appendChild(button);
-	setButtonPosition(document, button);
-
 	// create launchpad window
 	let launchpadWindow =
 	{
 		window : null,
 		browser : null,
-		mainWindowContent : null,
 		resize : null,
 		_open : function()
 		{
@@ -224,7 +205,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			{
 				let {selectedTab, selectedBrowser : {contentWindow}} = gBrowser;
 				if (contentWindow.location.href == 'about:blank' && contentWindow.document.readyState == 'complete' &&
-				    ! selectedTab.hasAttribute('pending') && selectedTab.__launchpadFlagLoaded__)
+				    ! selectedTab.hasAttribute('pending'))
 				{
 					if (this.window.classList.contains('open')) return;
 
@@ -251,7 +232,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		},
 		init : function()
 		{
-			this.mainWindowContent = document.getElementById('content');
+			let mainWindowContent = document.getElementById('content');
 
 			this.window = document.createElement('box');
 			this.window.setAttribute('id', PACKAGE_NAME + '-window');
@@ -264,15 +245,15 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			this.browser.setAttribute('src', MAIN_WIN_URI);
 
 			this.window.appendChild(this.browser);
-			this.mainWindowContent.appendChild(this.window);
+			mainWindow.appendChild(this.window);
 
 			let hiddenWindow = document.createElement('box');
 			hiddenWindow.setAttribute('id', PACKAGE_NAME + '-hidden-window');
-			this.mainWindowContent.appendChild(hiddenWindow);
+			mainWindow.appendChild(hiddenWindow);
 
 			this.resize = function()
 			{
-				let {x, y, width, height} = this.mainWindowContent.boxObject;
+				let {x, y, width, height} = mainWindowContent.boxObject;
 
 				this.browser.style.width   = width + 'px';
 				this.browser.style.height  = height + 'px';
@@ -308,7 +289,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 								false, '', null, 'Firefox Extenstion Notification: Launchpad'
 							);
 						} catch (e) {}
-
 					});
 				} catch (e) {}
 			};
@@ -332,10 +312,39 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		{
 			let {URL, defaultView} =  aEvent.originalTarget;
 			let {selectedTab, selectedBrowser} = gBrowser;
-			if (URL == 'about:blank' && defaultView == selectedBrowser.contentWindow && ! selectedTab.hasAttribute('pending'))
+			let tab = gBrowser.tabContainer.childNodes[gBrowser.getBrowserIndexForDocument(aEvent.originalTarget)];
+
+			if ('__launchpadFlagTabHasPending__' in tab)
 			{
-				selectedTab.__launchpadFlagLoaded__ = true;
-				launchpadWindow.toggle(true);
+				if (tab.__launchpadFlagTabHasPending__)
+				{
+					if (tab.__launchpadFlagTabPendingURI__ == defaultView.location.href)
+					{
+						delete tab.__launchpadFlagTabHasPending__;
+						delete tab.__launchpadFlagTabPendingURI__;
+					}
+					else
+					{
+						return;
+					}
+				}
+				else
+				{
+					delete tab.__launchpadFlagTabHasPending__;
+					delete tab.__launchpadFlagTabPendingURI__;
+				}
+			}
+
+			if (tab == selectedTab)
+			{
+				if (URL == 'about:blank')
+				{
+					launchpadWindow.toggle(true);
+				}
+				else
+				{
+					launchpadWindow.toggle(false);
+				}
 			}
 		},
 		init : function()
@@ -356,41 +365,48 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	let progressListener =
 	{
 		QueryInterface : XPCOMUtils.generateQI(['nsIWebProgressListener', 'nsISupportsWeakReference']),
-		pending : null,
 		loadingURI : null,
 		onLocationChange : function(aProgress, aRequest, aURI)
 		{
 			let DOMWindow = aProgress.DOMWindow;
+			let {selectedTab} = gBrowser;
+			let {readyState} = DOMWindow.document;
+			let uri = aURI.spec;
 
-			if (aURI.spec == 'about:blank' && DOMWindow.document.readyState == 'complete' && ! gBrowser.selectedTab.hasAttribute('pending') && gBrowser.selectedTab.__launchpadFlagLoaded__)
+			if (uri == 'about:blank' && readyState == 'uninitialized' && ( ! selectedTab.hasAttribute('pending') || ! selectedTab.__launchpadFlagTabHasPending__)) return;
+
+			if (selectedTab.hasAttribute('pending'))
 			{
-				launchpadWindow.toggle(true);
+				launchpadWindow.toggle(false);
+				selectedTab.__launchpadFlagTabHasPending__ = true;
+				selectedTab.__launchpadFlagTabPendingURI__ = uri;
 			}
 			else
 			{
-				launchpadWindow.toggle(false);
+				if ( ! selectedTab.__launchpadFlagTabHasPending__)
+				{
+					if (uri == 'about:blank' && readyState == 'complete')
+					{
+						launchpadWindow.toggle(true);
+					}
+					else
+					{
+						launchpadWindow.toggle(false);
+					}
+				}
+				else
+				{
+					if ((readyState == 'loading' || readyState == 'complete') && selectedTab.__launchpadFlagTabPendingURI__ != 'about:blank')
+					{
+						delete selectedTab.__launchpadFlagTabHasPending__;
+						delete selectedTab.__launchpadFlagTabPendingURI__;
+					}
+				}
 			}
 		},
-		onStateChange : function() {},
-		onProgressChange : function() {},
-		onStatusChange : function() {},
-		onSecurityChange : function() {},
-
 		init : function()
 		{
 			gBrowser.addProgressListener(this);
-
-			if (gBrowser.tabs.length < 2)
-			{
-				let DOMWindow = gBrowser.tabs[0].linkedBrowser.contentWindow;
-				let readyState = DOMWindow.document.readyState;
-
-				if (DOMWindow.location.href == 'about:blank' && readyState == 'complete')
-				{
-					launchpadWindow.toggle(true);
-				}
-			}
-
 			return this;
 		},
 		uninit : function()
@@ -526,7 +542,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 
 	function shutdownHandler()
 	{
-		removeButton(document, button);
 		pageLoadListener.uninit();
 		keyset.uninit();
 		contextMenu.uninit();
@@ -543,6 +558,43 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		contextMenu.uninit();
 		progressListener.uninit();
 		launchpadWindow.uninit();
+		onShutdown.remove(shutdownHandler);
+	}
+
+	onShutdown.add(shutdownHandler);
+
+	aWindow.addEventListener('unload', onUnload, false);
+});
+
+WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
+{
+	if (Prefs.firstrun == true)
+	{
+		Prefs.firstrun = false;
+		aWindow.openDialog(OPTIONS_WIN_URI, OPTIONS_WIN_TYPE, 'chrome,titlebar,centerscreen,dialog=yes');
+	}
+
+	let document = aWindow.document;
+
+	// add button to toolbar
+	let button = document.createElement('toolbarbutton');
+	button.setAttribute('id', PACKAGE_NAME + '-toolbar-button');
+	button.setAttribute('label', locale.toolbarButtonLabel);
+	button.setAttribute('tooltiptext', locale.toolbarButtonTooltip);
+	button.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
+	button.classList.add('toolbarbutton-1');
+	button.classList.add('chromeclass-toolbar-additional');
+	elementSelector(document, 'navigator-toolbox').palette.appendChild(button);
+	setButtonPosition(document, button);
+
+	function shutdownHandler()
+	{
+		removeButton(document, button);
+		aWindow.removeEventListener('unload', onUnload);
+	}
+
+	function onUnload()
+	{
 		onShutdown.remove(shutdownHandler);
 	}
 

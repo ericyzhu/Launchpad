@@ -14,6 +14,7 @@ let {FileUtils} = require('FileUtils');
 let {BookmarkUtils} = require('BookmarkUtils');
 let {Prefs, PrefListener} = require('Prefs');
 let {Storage} = require('Storage');
+let {Utils} = require('Utils');
 let {KeysMap : {KEYCODES, MODIFIERS}} = require('KeysMap');
 let {Localization} = require('Localization');
 let locale = Localization.getBundle('locale');
@@ -147,10 +148,11 @@ Storage.openConnection(FileUtils.getDataFile(['database.sqlite'], true),
 
 WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 {
-	let gBrowser = aWindow.getBrowser(), document = aWindow.document, mainWindow = document.getElementById('main-window');
+	let styleSheet, launchpadWindow, contextMenu, keyset;
+	let gBrowser = aWindow.getBrowser(), {document} = aWindow, mainWindow = document.getElementById('main-window');
 
 	// register style sheet
-	let styleSheet =
+	styleSheet =
 	{
 		_isRegistered : function()
 		{
@@ -175,7 +177,7 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 	}.init();
 
 	// create launchpad window
-	let launchpadWindow =
+	launchpadWindow =
 	{
 		window : null,
 		browser : null,
@@ -230,6 +232,32 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 				this._close();
 			}
 		},
+		addItemToLaunchpad : function(aURL, aTitle)
+		{
+			let bookmark =
+			{
+				uri      : aURL,
+				title    : aTitle,
+				type     : BookmarkUtils.TYPE_BOOKMARK,
+				index    : BookmarkUtils.DEFAULT_INDEX,
+				folderID : Prefs.bookmarksFolderID
+			};
+			BookmarkUtils.addBookmark(bookmark, function()
+			{
+				try
+				{
+					aWindow.setTimeout(function()
+					{
+						alertsService.showAlertNotification(alertIcon,
+							subString(bookmark.title != '' ? bookmark.title : bookmark.uri, 48),
+							locale.pageOrLinkAddedNotification,
+							false, '', null, 'Firefox Extenstion Notification: Launchpad'
+						);
+					}, 10);
+
+				} catch (e) {}
+			});
+		},
 		init : function()
 		{
 			let mainWindowContent = document.getElementById('content');
@@ -271,26 +299,52 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 				try
 				{
 					let window = gBrowser.selectedBrowser.contentWindow;
-					let bookmark =
+					launchpadWindow.addItemToLaunchpad(window.location.href, window.document.title);
+				} catch (e) {}
+			};
+
+			aWindow.AddLinkToLaunchpad = function()
+			{
+				let {gContextMenu} = aWindow;
+				let linkText;
+				if (gContextMenu.onPlainTextLink)
+				{
+					linkText = document.commandDispatcher.focusedWindow.getSelection().toString().trim();
+				}
+				else
+				{
+					linkText = gContextMenu.linkText();
+				}
+				launchpadWindow.addItemToLaunchpad(gContextMenu.linkURL, linkText);
+			};
+
+			aWindow.LaunchpadButtonEvents =
+			{
+				onDragenter : function(aEvent)
+				{
+				},
+				onDragover : function(aEvent)
+				{
+					aEvent.preventDefault();
+					try
 					{
-						uri      : window.location.href,
-						title    : window.document.title,
-						type     : BookmarkUtils.TYPE_BOOKMARK,
-						index    : BookmarkUtils.DEFAULT_INDEX,
-						folderID : Prefs.bookmarksFolderID
-					};
-					BookmarkUtils.addBookmark(bookmark, function()
+						let {dataTransfer} = aEvent;
+						if (Utils.filterDataTransferDataTypes(dataTransfer.types).length) dataTransfer.dropEffect = 'copy';
+					}
+					catch (e) {}
+				},
+				onDrop : function(aEvent)
+				{
+					let dataTransfer = aEvent.dataTransfer;
+					aWindow.setTimeout(function()
 					{
 						try
 						{
-							alertsService.showAlertNotification(alertIcon,
-								subString(bookmark.title != '' ? bookmark.title : bookmark.uri, 48),
-								locale.pageAddedNotification,
-								false, '', null, 'Firefox Extenstion Notification: Launchpad'
-							);
-						} catch (e) {}
-					});
-				} catch (e) {}
+							Utils.dropEventHandler({dataTransfer : dataTransfer}, function(aURI, aTitle) launchpadWindow.addItemToLaunchpad(aURI, aTitle));
+						}
+						catch (e) {}
+					}, 0);
+				}
 			};
 
 			return this;
@@ -300,141 +354,72 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 			aWindow.removeEventListener('resize', this.resize, false);
 			delete aWindow.ToggleLaunchpadWindow;
 			delete aWindow.AddPageToLaunchpad;
+			delete aWindow.AddLinkToLaunchpad;
+			delete aWindow.LaunchpadButtonEvents;
 			this.window.parentNode.removeChild(this.window);
 			this.resize = null;
 		}
 	}.init();
 
-	let pageLoadListener =
+	contextMenu =
 	{
-		appcontent : null,
-		onPageLoad : function(aEvent)
-		{
-			let {URL, defaultView} =  aEvent.originalTarget;
-			let {selectedTab, selectedBrowser} = gBrowser;
-			let tab = gBrowser.tabContainer.childNodes[gBrowser.getBrowserIndexForDocument(aEvent.originalTarget)];
-
-			if ('__launchpadFlagTabHasPending__' in tab)
-			{
-				if (tab.__launchpadFlagTabHasPending__)
-				{
-					if (tab.__launchpadFlagTabPendingURI__ == defaultView.location.href)
-					{
-						delete tab.__launchpadFlagTabHasPending__;
-						delete tab.__launchpadFlagTabPendingURI__;
-					}
-					else
-					{
-						return;
-					}
-				}
-				else
-				{
-					delete tab.__launchpadFlagTabHasPending__;
-					delete tab.__launchpadFlagTabPendingURI__;
-				}
-			}
-
-			if (tab == selectedTab)
-			{
-				if (URL == 'about:blank')
-				{
-					launchpadWindow.toggle(true);
-				}
-				else
-				{
-					launchpadWindow.toggle(false);
-				}
-			}
-		},
-		init : function()
-		{
-			this.appcontent = document.getElementById('appcontent');
-			this.appcontent && this.appcontent.addEventListener('DOMContentLoaded', this.onPageLoad, true);
-
-			return this;
-		},
-		uninit : function()
-		{
-			this.appcontent && this.appcontent.removeEventListener('DOMContentLoaded', this.onPageLoad, true);
-			this.appcontent = null;
-		}
-	}.init();
-
-	// progress listener
-	let progressListener =
-	{
-		QueryInterface : XPCOMUtils.generateQI(['nsIWebProgressListener', 'nsISupportsWeakReference']),
-		loadingURI : null,
-		onLocationChange : function(aProgress, aRequest, aURI)
-		{
-			let DOMWindow = aProgress.DOMWindow;
-			let {selectedTab} = gBrowser;
-			let {readyState} = DOMWindow.document;
-			let uri = aURI.spec;
-
-			if (uri == 'about:blank' && readyState == 'uninitialized' && ( ! selectedTab.hasAttribute('pending') || ! selectedTab.__launchpadFlagTabHasPending__)) return;
-
-			if (selectedTab.hasAttribute('pending'))
-			{
-				launchpadWindow.toggle(false);
-				selectedTab.__launchpadFlagTabHasPending__ = true;
-				selectedTab.__launchpadFlagTabPendingURI__ = uri;
-			}
-			else
-			{
-				if ( ! selectedTab.__launchpadFlagTabHasPending__)
-				{
-					if (uri == 'about:blank' && readyState == 'complete')
-					{
-						launchpadWindow.toggle(true);
-					}
-					else
-					{
-						launchpadWindow.toggle(false);
-					}
-				}
-				else
-				{
-					if ((readyState == 'loading' || readyState == 'complete') && selectedTab.__launchpadFlagTabPendingURI__ != 'about:blank')
-					{
-						delete selectedTab.__launchpadFlagTabHasPending__;
-						delete selectedTab.__launchpadFlagTabPendingURI__;
-					}
-				}
-			}
-		},
-		init : function()
-		{
-			gBrowser.addProgressListener(this);
-			return this;
-		},
-		uninit : function()
-		{
-			gBrowser.removeProgressListener(this);
-		}
-	}.init();
-
-	let contextMenu =
-	{
+		listener : null,
 		menuitems : null,
+		contentAreaContextMenu : null,
+		showItem: function(aItem, aShow)
+		{
+			aItem.hidden = ! aShow;
+		},
 		init : function()
 		{
+			let options =
+			{
+				attributes: true,
+				attributeFilter: ['popupState']
+			};
 			this.menuitems = [];
+			this.observers = [];
+			this.contentAreaContextMenu = document.getElementById('contentAreaContextMenu');
 
-			let menuitem;
-			menuitem = document.createElement('menuitem');
-			menuitem.setAttribute('id', PACKAGE_NAME + '-context-add-to-launchpad');
-			menuitem.setAttribute('oncommand', 'AddPageToLaunchpad();');
-			menuitem.setAttribute('label', locale.addThisPageToLaunchpad);
+			let menuitemBookmarkPage, menuitemBookmarkLink, menuitemAddPage, menuitemAddLink, gContextMenu;
+			menuitemBookmarkPage = document.getElementById('context-bookmarkpage');
+			menuitemBookmarkLink= document.getElementById('context-bookmarklink');
 
-			this.menuitems.push(menuitem);
-			document.getElementById('contentAreaContextMenu').insertBefore(menuitem, document.getElementById('context-bookmarkpage'));
+			menuitemAddPage = document.createElement('menuitem');
+			menuitemAddPage.setAttribute('id', PACKAGE_NAME + '-context-add-page-to-launchpad');
+			menuitemAddPage.setAttribute('oncommand', 'AddPageToLaunchpad();');
+			menuitemAddPage.setAttribute('label', locale.addThisPageToLaunchpad);
+			menuitemAddPage.setAttribute('hidden', true);
+
+			menuitemAddLink = document.createElement('menuitem');
+			menuitemAddLink.setAttribute('id', PACKAGE_NAME + '-context-add-link-to-launchpad');
+			menuitemAddLink.setAttribute('oncommand', 'AddLinkToLaunchpad();');
+			menuitemAddLink.setAttribute('label', locale.addThisLinkToLaunchpad);
+			menuitemAddLink.setAttribute('hidden', true);
+
+			this.menuitems.push(menuitemAddPage, menuitemAddLink);
+
+			this.contentAreaContextMenu.insertBefore(menuitemAddPage, menuitemBookmarkPage);
+			this.contentAreaContextMenu.insertBefore(menuitemAddLink, menuitemBookmarkLink);
+
+			this.listener = function()
+			{
+				let {gContextMenu} = aWindow;
+				if (gContextMenu)
+				{
+					this.showItem(menuitemAddPage, ! (gContextMenu.isContentSelected || gContextMenu.onTextInput || gContextMenu.onLink || gContextMenu.onImage || gContextMenu.onVideo || gContextMenu.onAudio || gContextMenu.onSocial));
+					this.showItem(menuitemAddLink, (gContextMenu.onLink && ! gContextMenu.onMailtoLink && ! gContextMenu.onSocial) || gContextMenu.onPlainTextLink);
+				}
+			}.bind(this);
+
+			this.contentAreaContextMenu.addEventListener('popupshowing', this.listener, false);
 
 			return this;
 		},
 		uninit : function()
 		{
+			this.contentAreaContextMenu.removeEventListener('popupshowing', this.listener, false);
+			this.listener = null;
 			for (let i = 0; i < this.menuitems.length; i++)
 			{
 				let menuitem = this.menuitems[i];
@@ -445,7 +430,7 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 	}.init();
 
 	// create keyset
-	let keyset =
+	keyset =
 	{
 		keysets : null,
 		_listener : null,
@@ -542,10 +527,8 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 
 	function shutdownHandler()
 	{
-		pageLoadListener.uninit();
 		keyset.uninit();
 		contextMenu.uninit();
-		progressListener.uninit();
 		launchpadWindow.uninit();
 		styleSheet.uninit();
 		aWindow.removeEventListener('unload', onUnload);
@@ -553,10 +536,8 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 
 	function onUnload()
 	{
-		pageLoadListener.uninit();
 		keyset.uninit();
 		contextMenu.uninit();
-		progressListener.uninit();
 		launchpadWindow.uninit();
 		onShutdown.remove(shutdownHandler);
 	}
@@ -574,7 +555,8 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		aWindow.openDialog(OPTIONS_WIN_URI, OPTIONS_WIN_TYPE, 'chrome,titlebar,centerscreen,dialog=yes');
 	}
 
-	let document = aWindow.document;
+	let pageLoadListener, progressListener;
+	let gBrowser = aWindow.getBrowser(), {document} = aWindow, mainWindow = document.getElementById('main-window');
 
 	// add button to toolbar
 	let button = document.createElement('toolbarbutton');
@@ -582,19 +564,150 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	button.setAttribute('label', locale.toolbarButtonLabel);
 	button.setAttribute('tooltiptext', locale.toolbarButtonTooltip);
 	button.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
+	button.setAttribute('ondragenter', 'LaunchpadButtonEvents.onDragenter(event);');
+	button.setAttribute('ondragover', 'LaunchpadButtonEvents.onDragover(event);');
+	button.setAttribute('ondrop', 'LaunchpadButtonEvents.onDrop(event);');
 	button.classList.add('toolbarbutton-1');
 	button.classList.add('chromeclass-toolbar-additional');
 	elementSelector(document, 'navigator-toolbox').palette.appendChild(button);
 	setButtonPosition(document, button);
 
+	pageLoadListener =
+	{
+		appcontent : null,
+		onPageLoad : function(aEvent)
+		{
+			let {URL, defaultView} =  aEvent.originalTarget;
+			let {selectedTab} = gBrowser;
+			let tab = gBrowser.tabContainer.childNodes[gBrowser.getBrowserIndexForDocument(aEvent.originalTarget)];
+
+			if ( ! tab) return;
+
+			if (typeof(tab.__launchpadFlagTabHasPending__) != 'undefined')
+			{
+				if (tab.__launchpadFlagTabHasPending__)
+				{
+					if (tab.__launchpadFlagTabPendingURI__ == defaultView.location.href)
+					{
+						delete tab.__launchpadFlagTabHasPending__;
+						delete tab.__launchpadFlagTabPendingURI__;
+					}
+					else
+					{
+						return;
+					}
+				}
+				else
+				{
+					delete tab.__launchpadFlagTabHasPending__;
+					delete tab.__launchpadFlagTabPendingURI__;
+				}
+			}
+
+			if (tab == selectedTab)
+			{
+				if (URL == 'about:blank')
+				{
+					aWindow.ToggleLaunchpadWindow(true);
+				}
+				else
+				{
+					aWindow.ToggleLaunchpadWindow(false);
+				}
+			}
+		},
+		init : function()
+		{
+			this.appcontent = document.getElementById('appcontent');
+			this.appcontent && this.appcontent.addEventListener('DOMContentLoaded', this.onPageLoad, true);
+
+			return this;
+		},
+		uninit : function()
+		{
+			this.appcontent && this.appcontent.removeEventListener('DOMContentLoaded', this.onPageLoad, true);
+			this.appcontent = null;
+		}
+	}.init();
+
+	// progress listener
+	progressListener =
+	{
+		QueryInterface : XPCOMUtils.generateQI(['nsIWebProgressListener', 'nsISupportsWeakReference']),
+		loadingURI : null,
+		onLocationChange : function(aProgress, aRequest, aURI)
+		{
+			let DOMWindow = aProgress.DOMWindow;
+			let {selectedTab} = gBrowser;
+			let {readyState} = DOMWindow.document;
+			let uri = aURI.spec;
+
+			if (uri == 'about:blank' && readyState == 'uninitialized' && ( ! selectedTab.hasAttribute('pending') || ! selectedTab.__launchpadFlagTabHasPending__)) return;
+
+			if (selectedTab.hasAttribute('pending'))
+			{
+				aWindow.ToggleLaunchpadWindow(false);
+				selectedTab.__launchpadFlagTabHasPending__ = true;
+				selectedTab.__launchpadFlagTabPendingURI__ = uri;
+			}
+			else
+			{
+				if ( ! selectedTab.__launchpadFlagTabHasPending__)
+				{
+					if (uri == 'about:blank' && readyState == 'complete')
+					{
+						aWindow.ToggleLaunchpadWindow(true);
+					}
+					else
+					{
+						aWindow.ToggleLaunchpadWindow(false);
+					}
+				}
+				else
+				{
+					if ((readyState == 'loading' || readyState == 'complete') && selectedTab.__launchpadFlagTabPendingURI__ != 'about:blank')
+					{
+						delete selectedTab.__launchpadFlagTabHasPending__;
+						delete selectedTab.__launchpadFlagTabPendingURI__;
+					}
+				}
+			}
+		},
+		init : function()
+		{
+			gBrowser.addProgressListener(this);
+
+			if (gBrowser.tabs.length < 2)
+			{
+				let DOMWindow = gBrowser.tabs[0].linkedBrowser.contentWindow;
+				let readyState = DOMWindow.document.readyState;
+
+				if (DOMWindow.location.href == 'about:blank' && readyState == 'complete')
+				{
+					aWindow.ToggleLaunchpadWindow(true);
+				}
+			}
+
+			return this;
+		},
+		uninit : function()
+		{
+			gBrowser.removeProgressListener(this);
+		}
+	}.init();
+
 	function shutdownHandler()
 	{
+		pageLoadListener.uninit();
+		progressListener.uninit();
 		removeButton(document, button);
 		aWindow.removeEventListener('unload', onUnload);
 	}
 
 	function onUnload()
 	{
+		pageLoadListener.uninit();
+		progressListener.uninit();
 		onShutdown.remove(shutdownHandler);
 	}
 

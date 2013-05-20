@@ -7,6 +7,7 @@
 'use strict';
 
 let {atob, btoa} = Cu.import('resource://gre/modules/Services.jsm', null);
+let SUPPORTED_DATATRANSFER_DATA_TYPES = ['text/x-moz-url', 'text/x-moz-text-internal'];
 
 exports.Utils =
 {
@@ -87,6 +88,61 @@ exports.Utils =
 		}
 
 		return array;
+	},
+
+	filterDataTransferDataTypes : function(aTypes)
+	{
+		aTypes = SUPPORTED_DATATRANSFER_DATA_TYPES.filter(function(aValue)
+		{
+			return aTypes.contains(aValue);
+		});
+
+		if (aTypes.length)
+		{
+			return aTypes;
+		}
+
+		return [];
+	},
+
+	dropEventHandler : function(aEvent, aCallback)
+	{
+		let {dataTransfer} = aEvent;
+
+		if ( ! dataTransfer)
+		{
+			return;
+		}
+
+		let types = this.filterDataTransferDataTypes(dataTransfer.types);
+		if ( ! types.length)
+		{
+			return;
+		}
+
+		//aEvent.preventDefault();
+
+		let type = types.shift();
+		let bookmarkURI, bookmarkTitle;
+
+		switch (type)
+		{
+			case 'text/x-moz-url':
+				let [uri, title] = dataTransfer.getData('text/x-moz-url').split(/\n/g);
+				bookmarkURI = uri;
+				bookmarkTitle = title;
+				break;
+
+			case 'text/x-moz-text-internal':
+				bookmarkURI = dataTransfer.mozGetDataAt('text/x-moz-text-internal', 0);
+				break;
+		}
+
+		if (bookmarkURI)
+		{
+			bookmarkTitle = bookmarkTitle ? bookmarkTitle : '';
+			aCallback && aCallback(bookmarkURI, bookmarkTitle);
+		}
 	}
 }
 

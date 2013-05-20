@@ -10,11 +10,6 @@
     background-color: rgba(125,127,130, .9);
 }
 
-*
-{
-    -moz-user-select: none;
-}
-
 a,
 a:active,
 a:focus
@@ -25,6 +20,12 @@ a:focus
 input
 {
     -moz-user-select: text;
+}
+
+span::-moz-selection,
+description::-moz-selection
+{
+    background: none;
 }
 
 #scrollbox

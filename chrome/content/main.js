@@ -268,6 +268,12 @@ function init()
 		}
 	})();
 
+	document.addEventListener('dragstart', function(aEvent)
+	{
+		aEvent.preventDefault();
+		aEvent.stopPropagation();
+	}, false);
+
 	Launchpad.popup.init();
 	Launchpad.speeddial.init();
 
@@ -351,7 +357,7 @@ function init()
 		}
 		else
 		{
-			mainWindow.ToggleLaunchpadWindow();
+			mainWindow.ToggleLaunchpadWindow(false);
 		}
 	}
 

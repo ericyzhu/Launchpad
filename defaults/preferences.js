@@ -10,7 +10,7 @@ pref('extensions.launchpad-mozest-org.backgroundImagePath', '');
 pref('extensions.launchpad-mozest-org.backgroundImageDisplay', false);
 pref('extensions.launchpad-mozest-org.toolbarButtonPosition', ['nav-bar','urlbar-container']);
 pref('extensions.launchpad-mozest-org.bookmarksFolderID', -1);
-pref('extensions.launchpad-mozest-org.dialpadButtonAutosizeEnabled', false);
+pref('extensions.launchpad-mozest-org.dialpadButtonAutosizeEnabled', true);
 pref('extensions.launchpad-mozest-org.dialpadButtonThumbnailWidthDefault', 256);
 pref('extensions.launchpad-mozest-org.dialpadButtonThumbnailHeightRatio', 0.625);
 pref('extensions.launchpad-mozest-org.dialpadButtonTitleHeight', 28);

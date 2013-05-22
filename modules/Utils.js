@@ -138,7 +138,7 @@ exports.Utils =
 				break;
 		}
 
-		if (bookmarkURI)
+		if (bookmarkURI && bookmarkURI != 'about:launchpad' && bookmarkURI != 'about:blank')
 		{
 			bookmarkTitle = bookmarkTitle ? bookmarkTitle : '';
 			aCallback && aCallback(bookmarkURI, bookmarkTitle);

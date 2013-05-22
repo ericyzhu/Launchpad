@@ -1,9 +1,10 @@
 pref('extensions.launchpad-mozest-org.firstrun', true);
 pref('extensions.launchpad-mozest-org.version', '');
-pref('extensions.launchpad-mozest-org.loadInNewtabPage', false);
 pref('extensions.launchpad-mozest-org.setAsHomepage', false);
-pref('extensions.launchpad-mozest-org.originalNewTabURL', '');
+pref('extensions.launchpad-mozest-org.loadInNewTab', false);
+pref('extensions.launchpad-mozest-org.loadInBlankNewWindows', false);
 pref('extensions.launchpad-mozest-org.originalHomepage', '');
+pref('extensions.launchpad-mozest-org.originalNewTabURL', '');
 pref('extensions.launchpad-mozest-org.useBackgroundImage', false);
 pref('extensions.launchpad-mozest-org.backgroundImagePath', '');
 pref('extensions.launchpad-mozest-org.backgroundImageDisplay', false);

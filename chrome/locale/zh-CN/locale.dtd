@@ -25,8 +25,9 @@
 <!ENTITY popupEditItem.never       "永不">
 <!ENTITY popupEditItem.pageDefault "网页默认">
 
-<!ENTITY options.WindowTitle        "偏好设置">
-<!ENTITY options.openLaunchpad      "打开 Launchpad：">
-<!ENTITY options.addPageToLaunchpad "添加页面到 Launchpad：">
-<!ENTITY options.setAsHomepage      "将 Launchpad 设为主页">
-<!ENTITY options.loadInNewtabPage   "在新建标签页中载入 Launchpad">
+<!ENTITY options.WindowTitle           "偏好设置">
+<!ENTITY options.openLaunchpad         "打开 Launchpad：">
+<!ENTITY options.addPageToLaunchpad    "添加页面到 Launchpad：">
+<!ENTITY options.setAsHomepage         "设为主页">
+<!ENTITY options.loadInNewTab          "在“新标签页”中载入">
+<!ENTITY options.loadInBlankNewWindows "在空白的新窗口中载入">

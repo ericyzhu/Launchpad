@@ -115,20 +115,16 @@ function startup(aData, aReason)
 	shutdownHandlers = [];
 
 	addonData = aData;
-	AddonManager.getAddonByID(aData.id, function(aAddon)
-	{
-		addonData.NAME     = aAddon.name;
-	});
-	addonData.PACKAGE_NAME     = 'launchpad-mozest-org';
-	addonData.MAIN_WIN_URI     = 'chrome://launchpad-mozest-org/content/main.xul';
-	addonData.MAIN_WIN_TYPE    = 'launchpad-mozest-org:main';
-	addonData.OPTIONS_WIN_URI  = 'chrome://launchpad-mozest-org/content/options.xul';
-	addonData.OPTIONS_WIN_TYPE = 'launchpad-mozest-org:options';
-	addonData.ROOT_PATH_URI    = aData.resourceURI.spec;
-	addonData.CONTENT_DIR_URI  = 'chrome://launchpad-mozest-org/content/';
-	addonData.SKIN_DIR_URI     = 'chrome://launchpad-mozest-org/skin/';
-	addonData.LOCALE_DIR_URI   = 'chrome://launchpad-mozest-org/locale/';
-	addonData.STARTUP_REASON   = aReason;
+	addonData.__defineGetter__('PACKAGE_NAME',     function() 'launchpad-mozest-org');
+	addonData.__defineGetter__('MAIN_WIN_URI',     function() 'chrome://launchpad-mozest-org/content/main.xul');
+	addonData.__defineGetter__('MAIN_WIN_TYPE',    function() 'launchpad-mozest-org:main');
+	addonData.__defineGetter__('OPTIONS_WIN_URI',  function() 'chrome://launchpad-mozest-org/content/options.xul');
+	addonData.__defineGetter__('OPTIONS_WIN_TYPE', function() 'launchpad-mozest-org:options');
+	addonData.__defineGetter__('ROOT_PATH_URI',    function() aData.resourceURI.spec);
+	addonData.__defineGetter__('CONTENT_DIR_URI',  function() 'chrome://launchpad-mozest-org/content/');
+	addonData.__defineGetter__('SKIN_DIR_URI',     function() 'chrome://launchpad-mozest-org/skin/');
+	addonData.__defineGetter__('LOCALE_DIR_URI',   function() 'chrome://launchpad-mozest-org/locale/');
+	addonData.__defineGetter__('STARTUP_REASON',   function() aReason);
 
 	observer.register();
 	require('Main');

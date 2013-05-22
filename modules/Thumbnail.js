@@ -6,11 +6,15 @@
 
 'use strict';
 
+let fileProtocolHandler = Cc['@mozilla.org/network/protocol;1?name=file'].getService(Ci.nsIFileProtocolHandler);
 let {FileUtils} = require('FileUtils');
 let {Storage : {connection : Storage}} = require('Storage');
 let {Snapshot} = require('Snapshot');
 let {Utils} = require('Utils');
+let {ROOT_PATH_URI} = addonData;
 let imgCache = Cc['@mozilla.org/image/tools;1'].getService(Ci.imgITools).getImgCacheForDocument(null);
+let defaultImage = ROOT_PATH_URI + 'chrome/skin/icons/blank.png';
+let defaultImage2x = ROOT_PATH_URI + 'chrome/skin/icons/blank@2x.png';
 
 let expriesUpdateQueue = [];
 let listeners = [];
@@ -20,12 +24,13 @@ exports.Thumbnail =
 	get STATUS_IO_ERROR()        1,
 	get STATUS_STORAGE_ERROR()   2,
 	get STATUS_STATEMENT_ERROR() 3,
+	get STATUS_DRAW_ERROR()      4,
 	get TYPE_BOOKMARK()        'bookmark',
 	get TYPE_HISTORY()         'history',
 
 	_getFileURIForBookmarkQueue : [],
 
-	getFileURIForBookmark : function(aURI, aFarce, aNeedSyncMetadata)
+	getFileURIForBookmark : function(aURI, aFarce, aNeedSyncMetadata, aWindow)
 	{
 		let leafName = this.getLeafNameForURI(aURI);
 		let index = this._getFileURIForBookmarkQueue.indexOf(leafName);
@@ -83,6 +88,15 @@ exports.Thumbnail =
 		{
 			Snapshot.captureForBookmark(aURI, function(aStatus, aData, aDocumentTitle)
 			{
+				if (aStatus == Snapshot.STATUS_DRAW_ERROR)
+				{
+					let imageFile = aWindow.devicePixelRatio == 2 ?
+					                FileUtils.getFileByPath(fileProtocolHandler.getFileFromURLSpec(defaultImage2x).path) :
+					                FileUtils.getFileByPath(fileProtocolHandler.getFileFromURLSpec(defaultImage).path);
+					imageFile.copyTo(file.parent, leafName + '.' + Snapshot.CONTENT_TYPE.split('/')[1]);
+					aStatus = Snapshot.STATUS_SUCCESS;
+				}
+
 				if (aStatus == Snapshot.STATUS_SUCCESS)
 				{
 					this.save(this.TYPE_BOOKMARK, aURI, aData, aDocumentTitle, function(aStatus, aFile)
@@ -406,3 +420,8 @@ onShutdown.add(function()
 {
 	listeners = [];
 });
+
+onShutdown.add(function()
+{
+	FileUtils.removeDataDir('snapshots');
+}, ['uninstall']);

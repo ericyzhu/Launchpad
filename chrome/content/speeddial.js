@@ -1001,7 +1001,7 @@ Launchpad.speeddial = (function()
 
 			buttonEl.updateThumbnail = function(aForce, aNeedSyncMetadata)
 			{
-				Thumbnail.getFileURIForBookmark(uri, aForce, aNeedSyncMetadata);
+				Thumbnail.getFileURIForBookmark(uri, aForce, aNeedSyncMetadata, window);
 			};
 			buttonEl.remove = function()
 			{
@@ -1096,7 +1096,6 @@ Launchpad.speeddial = (function()
 
 								if (aNeedSyncMetadata || (title == '' && aMetadata.title != ''))
 								{
-
 									speeddial.update(
 									{
 										id    : id,
@@ -1104,6 +1103,10 @@ Launchpad.speeddial = (function()
 										type  : speeddial.BOOKMARK_TYPE_BOOKMARK
 									});
 								}
+							}
+							else
+							{
+								thumbnailEl.style.backgroundImage = 'url("' + DIALPAD_BUTTON_THUMBNAIL_DEFAULT + '")';
 							}
 						}
 					}
@@ -1152,8 +1155,19 @@ Launchpad.speeddial = (function()
 			{
 				if (aEvent.button == 0)
 				{
-					mainWindow.openLinkIn(aEvent.currentTarget.uri, 'current', {relatedToCurrent : false});
-					mainWindow.ToggleLaunchpadBox(false);
+					if (aEvent.shiftKey)
+					{
+						mainWindow.openLinkIn(aEvent.currentTarget.uri, 'window', {relatedToCurrent : false});
+					}
+					else if ((OS == 'Darwin' && aEvent.metaKey) || (OS != 'Darwin' && aEvent.ctrlKey))
+					{
+						mainWindow.openLinkIn(aEvent.currentTarget.uri, 'tab', {relatedToCurrent : true});
+					}
+					else
+					{
+						mainWindow.ToggleLaunchpadWindow(false);
+						mainWindow.openLinkIn(aEvent.currentTarget.uri, 'current', {relatedToCurrent : false});
+					}
 				}
 				aEvent.preventDefault();
 			},
@@ -1294,10 +1308,27 @@ Launchpad.speeddial = (function()
 						aEvent.preventDefault();
 						aEvent.stopPropagation();
 
+						let url;
 						let {dataTransfer} = aEvent;
-						if (Utils.filterDataTransferDataTypes(dataTransfer.types).length)
+						let types = Utils.filterDataTransferDataTypes(dataTransfer.types);
+						if (types.length)
 						{
-							dataTransfer.dropEffect = 'copy';
+							let type = types.shift();
+							switch (type)
+							{
+								case 'text/x-moz-url':
+									url = dataTransfer.getData('text/x-moz-url').split(/\n/g)[0];
+									break;
+
+								case 'text/x-moz-text-internal':
+									url = dataTransfer.mozGetDataAt('text/x-moz-text-internal', 0);
+									break;
+							}
+
+							if (url && url != 'about:launchpad' && url != 'about:blank')
+							{
+								dataTransfer.dropEffect = 'copy';
+							}
 						}
 					}
 				};

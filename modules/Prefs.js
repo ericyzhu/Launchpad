@@ -53,7 +53,7 @@ let uninstallHandler = function()
 	{
 		setCharPref(browserBranch, 'startup.homepage', exports.Prefs.originalHomepage);
 	}
-	if (exports.Prefs.loadInNewtabPage)
+	if (exports.Prefs.loadInNewTab)
 	{
 		setCharPref(browserBranch, 'newtab.url', exports.Prefs.originalNewTabURL);
 	}
@@ -67,10 +67,10 @@ let disableHandler = function()
 		setCharPref(browserBranch, 'startup.homepage', exports.Prefs.originalHomepage);
 		setBoolPref(branch, 'setAsHomepage', false);
 	}
-	if (exports.Prefs.loadInNewtabPage)
+	if (exports.Prefs.loadInNewTab)
 	{
 		setCharPref(browserBranch, 'newtab.url', exports.Prefs.originalNewTabURL);
-		setBoolPref(branch, 'loadInNewtabPage', false);
+		setBoolPref(branch, 'loadInNewTab', false);
 	}
 };
 
@@ -79,13 +79,13 @@ let updateNewTabURLPref = function()
 	try
 	{
 		let currentNewTabURL = getCharPref(browserBranch, 'newtab.url');
-		if (currentNewTabURL == 'about:blank')
+		if (currentNewTabURL == 'about:launchpad')
 		{
-			exports.Prefs.loadInNewtabPage = true;
+			exports.Prefs.loadInNewTab = true;
 		}
 		else
 		{
-			exports.Prefs.loadInNewtabPage = false;
+			exports.Prefs.loadInNewTab = false;
 			exports.Prefs.originalNewTabURL = currentNewTabURL;
 		}
 	}
@@ -100,7 +100,7 @@ let updateHomepagePref = function()
 	try
 	{
 		let currentHomepage = getCharPref(browserBranch, 'startup.homepage');
-		if (currentHomepage == 'about:blank')
+		if (currentHomepage == 'about:launchpad')
 		{
 			exports.Prefs.setAsHomepage = true;
 		}
@@ -244,17 +244,17 @@ function init()
 					exports.Prefs['__update__' + aName] = function()
 					{
 						value = getter(branch, aName);
-						setCharPref(browserBranch, 'startup.homepage', value ? 'about:blank' : exports.Prefs.originalHomepage);
+						setCharPref(browserBranch, 'startup.homepage', value ? 'about:launchpad' : exports.Prefs.originalHomepage);
 					}
 					break;
 				}
 
-				case 'loadInNewtabPage' :
+				case 'loadInNewTab' :
 				{
 					exports.Prefs['__update__' + aName] = function()
 					{
 						value = getter(branch, aName);
-						setCharPref(browserBranch, 'newtab.url', value ? 'about:blank' : exports.Prefs.originalNewTabURL);
+						setCharPref(browserBranch, 'newtab.url', value ? 'about:launchpad' : exports.Prefs.originalNewTabURL);
 					}
 					break;
 				}

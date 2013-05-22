@@ -13,15 +13,16 @@ let queue = [];
 
 exports.Snapshot =
 {
-	get STATUS_SUCCESS()  0,
-	get STATUS_TIMEOUT()  1,
-	get DEFAULT_WIDTH()   1280,
-	get DEFAULT_HEIGHT()  800,
-	get BOOKMARK_WIDTH()  512,
-	get BOOKMARK_HEIGHT() 320,
-	get CAPTURE_DELAY()   2 * 1000,
-	get CAPTURE_TIMEOUT() 30 * 1000,
-	get CONTENT_TYPE()    'image/png',
+	get STATUS_SUCCESS()    0,
+	get STATUS_TIMEOUT()    1,
+	get STATUS_DRAW_ERROR() 2,
+	get DEFAULT_WIDTH()     1280,
+	get DEFAULT_HEIGHT()    800,
+	get BOOKMARK_WIDTH()    512,
+	get BOOKMARK_HEIGHT()   320,
+	get CAPTURE_DELAY()     2 * 1000,
+	get CAPTURE_TIMEOUT()   30 * 1000,
+	get CONTENT_TYPE()      'image/png',
 
 	getScreenSize : function()
 	{
@@ -202,9 +203,20 @@ exports.Snapshot =
 
 				window.setTimeout(function ()
 				{
-					for (let i = 0; i < callbacks.length; i++)
+					let imageData = this.captureToCanvas(window, canvas);
+					if (imageData)
 					{
-						callbacks[i](this.STATUS_SUCCESS, this.captureToCanvas(window, canvas), window.document.title);
+						for (let i = 0; i < callbacks.length; i++)
+						{
+							callbacks[i](this.STATUS_SUCCESS, imageData, window.document.title);
+						}
+					}
+					else
+					{
+						for (let i = 0; i < callbacks.length; i++)
+						{
+							callbacks[i](this.STATUS_DRAW_ERROR, null, null);
+						}
 					}
 					cleanAndContinue();
 				}.bind(this), this.CAPTURE_DELAY);
@@ -240,7 +252,10 @@ exports.Snapshot =
 		{
 			context.drawWindow(aWindow, 0, 0, sw, sh, 'rgba(0,0,0,0)');
 		}
-		catch (e) {}
+		catch (e)
+		{
+			return null;
+		}
 		context.restore();
 
 		let dataURL = aCanvas.toDataURL(this.CONTENT_TYPE);

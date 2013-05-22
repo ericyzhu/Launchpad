@@ -25,8 +25,9 @@
 <!ENTITY popupEditItem.never       "Never">
 <!ENTITY popupEditItem.pageDefault "Page Default">
 
-<!ENTITY options.WindowTitle      "Perferences">
-<!ENTITY options.openLaunchpad    "Open Launchpad: ">
-<!ENTITY options.addPageToLaunchpad "Add page to Launchpad: ">
-<!ENTITY options.setAsHomepage    "Set Launchpad as homepage">
-<!ENTITY options.loadInNewtabPage "Load Launchpad in new tab page">
+<!ENTITY options.WindowTitle           "Perferences">
+<!ENTITY options.openLaunchpad         "Open Launchpad: ">
+<!ENTITY options.addPageToLaunchpad    "Add page to Launchpad: ">
+<!ENTITY options.setAsHomepage         "Set as homepage">
+<!ENTITY options.loadInNewTab          "Load in New Tab">
+<!ENTITY options.loadInBlankNewWindows "Load in blank new windows">

@@ -33,7 +33,7 @@
     opacity: 0;
 }
 
-#launchpad-mozest-org-window.open
+#launchpad-mozest-org-window[display="show"]
 {
     visibility: visible;
     transition-delay: 0ms;

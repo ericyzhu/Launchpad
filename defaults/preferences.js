@@ -8,7 +8,7 @@ pref('extensions.launchpad-mozest-org.originalNewTabURL', '');
 pref('extensions.launchpad-mozest-org.useBackgroundImage', false);
 pref('extensions.launchpad-mozest-org.backgroundImagePath', '');
 pref('extensions.launchpad-mozest-org.backgroundImageDisplay', false);
-pref('extensions.launchpad-mozest-org.toolbarButtonPosition', ['nav-bar','urlbar-container']);
+pref('extensions.launchpad-mozest-org.toolbarButtonPlace', ['nav-bar', null]);
 pref('extensions.launchpad-mozest-org.bookmarksFolderID', -1);
 pref('extensions.launchpad-mozest-org.dialpadButtonAutosizeEnabled', true);
 pref('extensions.launchpad-mozest-org.dialpadButtonThumbnailWidthDefault', 256);

@@ -143,6 +143,27 @@ exports.Utils =
 			bookmarkTitle = bookmarkTitle ? bookmarkTitle : '';
 			aCallback && aCallback(bookmarkURI, bookmarkTitle);
 		}
+	},
+
+	subString : function(aString, aLength)
+	{
+		let pattern = /[^\x00-\xff]/g;
+		let length = aString.replace(pattern, '**').length;
+
+		let output = '';
+		let char;
+		let tempLength = 0;
+		for (let i = 0; i < aString.length; i++)
+		{
+			char = aString.charAt(i).toString();
+			if (char.match(pattern) == null) tempLength++;
+			else tempLength += 2;
+			if (tempLength > aLength) break;
+			output += char;
+		}
+		if (length > aLength) output += '...';
+
+		return output;
 	}
 }
 

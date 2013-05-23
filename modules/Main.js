@@ -45,92 +45,6 @@ aboutClass.prototype =
 }
 ComponentRegistrar.registerFactory(ComponentRegistrar.creatFactory(aboutClass));
 
-function elementSelector(aDocument, aID, aQueryAll)
-{
-	return aDocument[aQueryAll ? 'querySelectorAll' : 'getElementById'](aID);
-}
-
-function setButtonPosition(aDocument, aButton)
-{
-	let toolbars = elementSelector(aDocument, 'toolbar', true);
-	let toolbar, currentset, index;
-
-	for (let i = 0; i < toolbars.length; i++)
-	{
-		currentset = toolbars[i].getAttribute('currentset').split(',');
-		index = currentset.indexOf(aButton.id);
-		if (index >= 0)
-		{
-			toolbar = toolbars[i];
-			break;
-		}
-	}
-
-	if ( ! toolbar && Prefs.toolbarButtonPosition)
-	{
-		let [toolbarID, beforeID] = Prefs.toolbarButtonPosition;
-		toolbar = elementSelector(aDocument, toolbarID);
-		if (toolbar)
-		{
-			currentset = toolbar.getAttribute('currentset').split(',');
-			index = (beforeID && currentset.indexOf(beforeID)) || -1;
-
-			if (index >= 0)
-			{
-				currentset.splice(index, 0, aButton.id);
-			}
-			else
-			{
-				currentset.push(aButton.id);
-			}
-
-			toolbar.setAttribute('currentset', currentset.join(','));
-			aDocument.persist(toolbarID, 'currentset');
-		}
-	}
-
-	if (toolbar)
-	{
-		if (index >= 0)
-		{
-			for (let i = index + 1; i < currentset.length; i++)
-			{
-				let before = elementSelector(aDocument, currentset[i]);
-				if (before)
-				{
-					toolbar.insertItem(aButton.id, before);
-					break;
-				}
-			}
-		}
-		else
-		{
-			toolbar.insertItem(aButton.id);
-
-		}
-	}
-}
-
-function removeButton(aDocument, aButton)
-{
-	let toolbars = elementSelector(aDocument, 'toolbar', true);
-	let buttonPosition = null;
-
-	for (let i = 0; i < toolbars.length; i++)
-	{
-		let currentset = toolbars[i].getAttribute('currentset').split(',');
-		let index = currentset.indexOf(aButton.id);
-		if (index >= 0)
-		{
-			buttonPosition = [toolbars[i].id, currentset[index + 1]];
-			break;
-		}
-	}
-
-	Prefs.toolbarButtonPosition = buttonPosition;
-	aButton.parentNode.removeChild(aButton);
-}
-
 Storage.openConnection(FileUtils.getDataFile(['database.sqlite'], true),
 {
 	onSuccess : function(aConnection)
@@ -205,7 +119,6 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 		resize : null,
 		_show : function()
 		{
-			this.resize();
 			if (this.window.getAttribute('display') == 'hide')
 			{
 				this.window.setAttribute('display', 'show');
@@ -216,6 +129,10 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 				aWindow.gURLBar.focus();
 				aWindow.gURLBar.select();
 			}
+			aWindow.setTimeout(function()
+			{
+				this.resize();
+			}.bind(this), 0);
 		},
 		_hide : function()
 		{
@@ -232,7 +149,14 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 
 			if (gBrowser.selectedBrowser.contentDocument.URL == 'about:launchpad')
 			{
-				if (this.window.getAttribute('display') == 'show') return;
+				if (this.window.getAttribute('display') == 'show')
+				{
+					aWindow.setTimeout(function()
+					{
+						this.resize();
+					}.bind(this), 0);
+					return;
+				}
 
 				windowState = true;
 			}
@@ -274,11 +198,11 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 					aWindow.setTimeout(function()
 					{
 						alertsService.showAlertNotification(alertIcon,
-							subString(bookmark.title != '' ? bookmark.title : bookmark.uri, 48),
+							Utils.subString(bookmark.title != '' ? bookmark.title : bookmark.uri, 48),
 							locale.pageOrLinkAddedNotification,
 							false, '', null, 'Firefox Extenstion Notification: Launchpad'
 						);
-					}, 50);
+					}, 100);
 				} catch (e) {}
 			});
 		},
@@ -510,21 +434,29 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 				{
 					try
 					{
-						keyset.parentNode.removeChild(keyset);
+						keyset && keyset.parentNode.removeChild(keyset);
 					} catch (e) {}
 				};
 				this.reset = function()
 				{
+					this.remove();
+
+					let shortcut = Prefs[prefName];
+					if ( ! shortcut || typeof(shortcut) != 'object') return;
+
+					let modifiers, keycode;
+					keycode = shortcut.keycode
+						? parseInt(shortcut.keycode)
+						: 0;
+
+					if ( ! keycode) return;
+
 					let keyModifiers = [];
 					let keyKeycode = '';
-					let {modifiers, keycode} = Prefs[prefName];
-					modifiers = modifiers
-						? (Array.isArray(modifiers) ? modifiers : [])
-						: [];
 
-					keycode = keycode
-						? parseInt(keycode)
-						: 0;
+					modifiers = shortcut.modifiers
+						? (Array.isArray(shortcut.modifiers) ? shortcut.modifiers : [])
+						: [];
 
 					for (let i = 0; i < modifiers.length; i++)
 					{
@@ -537,8 +469,6 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 						let [constantString] = KEYCODES[keycode];
 						keyKeycode = constantString;
 					}
-
-					this.remove();
 
 					keyset = document.createElement('keyset');
 					let key = document.createElement('key');
@@ -625,25 +555,112 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	if (Prefs.firstrun == true)
 	{
 		Prefs.firstrun = false;
+		aWindow.ToggleLaunchpadWindow(true);
 		aWindow.openDialog(OPTIONS_WIN_URI, OPTIONS_WIN_TYPE, 'chrome,titlebar,centerscreen,dialog=yes');
 	}
 
-	let pageLoadListener, tabSelectListener, progressListener;
+	let toolbarButton, pageLoadListener, progressListener;
 	let gBrowser = aWindow.getBrowser(), {document} = aWindow, mainWindow = document.getElementById('main-window');
 
 	// add button to toolbar
-	let button = document.createElement('toolbarbutton');
-	button.setAttribute('id', PACKAGE_NAME + '-toolbar-button');
-	button.setAttribute('label', locale.toolbarButtonLabel);
-	button.setAttribute('tooltiptext', locale.toolbarButtonTooltip);
-	button.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
-	button.setAttribute('ondragenter', 'LaunchpadButtonEvents.onDragenter(event);');
-	button.setAttribute('ondragover', 'LaunchpadButtonEvents.onDragover(event);');
-	button.setAttribute('ondrop', 'LaunchpadButtonEvents.onDrop(event);');
-	button.classList.add('toolbarbutton-1');
-	button.classList.add('chromeclass-toolbar-additional');
-	elementSelector(document, 'navigator-toolbox').palette.appendChild(button);
-	setButtonPosition(document, button);
+	toolbarButton =
+	{
+		button : null,
+		appendButtonToToolbar : function()
+		{
+			let toolbars = document.querySelectorAll('toolbar');
+			let toolbar, beforeNode = null, button = this.button;
+
+			for (let i = 0; i < toolbars.length; i++)
+			{
+				let currentset = toolbars[i].getAttribute('currentset').split(',');
+				let index = currentset.indexOf(button.id);
+				if (index > -1)
+				{
+					toolbar = toolbars[i];
+					beforeNode = index + 1 < currentset.length ?
+					             (document.getElementById(currentset[index + 1]) || null) : null;
+					break;
+				}
+			}
+
+			if (toolbar)
+			{
+				toolbar.appendChild(button);
+				toolbar.insertItem(button.id, beforeNode);
+			}
+			else
+			{
+				document.getElementById('navigator-toolbox').palette.appendChild(this.button);
+				if (Prefs.toolbarButtonPlace)
+				{
+					let [toolbarID, beforeID] = Prefs.toolbarButtonPlace;
+					toolbar = toolbarID ? document.getElementById(toolbarID) : null;
+					if (toolbar)
+					{
+						let currentset = toolbar.hasAttribute('currentset') ?
+						                 toolbar.getAttribute('currentset').split(',') : toolbar.getAttribute('defaultset').split(',');
+
+						let index = beforeID ? currentset.indexOf(beforeID) : -1;
+						beforeNode = index > -1 ?
+						             (document.getElementById(beforeID) || null) : null;
+
+						toolbar.appendChild(button);
+						toolbar.insertItem(button.id, beforeNode);
+
+						beforeNode ? currentset.splice(index, 0, button.id) : currentset.push(button.id);
+
+						let newSet = currentset.join(',');
+						toolbar.setAttribute('currentset', newSet);
+						toolbar.currentSet = newSet;
+						document.persist(toolbarID, 'currentset');
+
+						try
+						{
+							aWindow.BrowserToolboxCustomizeDone(true);
+						} catch (e) {}
+					}
+				}
+			}
+		},
+		init : function()
+		{
+			let button = document.createElement('toolbarbutton');
+			button.setAttribute('id', PACKAGE_NAME + '-toolbar-button');
+			button.setAttribute('label', locale.toolbarButtonLabel);
+			button.setAttribute('tooltiptext', locale.toolbarButtonTooltip);
+			button.setAttribute('oncommand', 'ToggleLaunchpadWindow();');
+			button.setAttribute('ondragenter', 'LaunchpadButtonEvents.onDragenter(event);');
+			button.setAttribute('ondragover', 'LaunchpadButtonEvents.onDragover(event);');
+			button.setAttribute('ondrop', 'LaunchpadButtonEvents.onDrop(event);');
+			button.classList.add('toolbarbutton-1');
+			button.classList.add('chromeclass-toolbar-additional');
+			this.button = button;
+			this.appendButtonToToolbar();
+
+			return this;
+		},
+		uninit : function()
+		{
+			let toolbars = document.querySelectorAll('toolbar'), button = this.button;
+			let toolbarButtonPlace = [null, null];
+
+			for (let i = 0; i < toolbars.length; i++)
+			{
+				let currentset = toolbars[i].getAttribute('currentset').split(',');
+				let index = currentset.indexOf(button.id);
+				if (index >= 0)
+				{
+					toolbarButtonPlace = [toolbars[i].id, currentset[index + 1]];
+					break;
+				}
+			}
+
+			Prefs.toolbarButtonPlace = toolbarButtonPlace;
+			button.parentNode.removeChild(button);
+			this.button = null;
+		}
+	}.init();
 
 	pageLoadListener =
 	{
@@ -681,37 +698,6 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 		}
 	}.init();
 
-	tabSelectListener =
-	{
-		tabContainer : null,
-		listener : null,
-		init : function()
-		{
-			this.tabContainer = gBrowser.tabContainer;
-			this.listener = function()
-			{
-				let browser = gBrowser.selectedBrowser;
-				if (browser.contentDocument.URL == 'about:launchpad')
-				{
-					aWindow.ToggleLaunchpadWindow(true);
-				}
-				else
-				{
-					aWindow.ToggleLaunchpadWindow(false);
-				}
-			}
-			this.tabContainer.addEventListener('TabSelect', this.listener, false);
-
-			return this;
-		},
-		uninit : function()
-		{
-			this.tabContainer.removeEventListener('TabSelect', this.listener, false);
-			this.tabContainer = null;
-			this.listener = null;
-		},
-	}.init();
-
 	// progress listener
 	progressListener =
 	{
@@ -722,6 +708,19 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 			if (aURI.spec != 'about:launchpad')
 			{
 				aWindow.ToggleLaunchpadWindow(false);
+			}
+			else
+			{
+				if ( ! gBrowser.selectedBrowser.userTypedValue)
+				{
+					aWindow.setTimeout(function()
+					{
+						aWindow.gURLBar.value = '';
+						aWindow.gURLBar.focus();
+						aWindow.gURLBar.select();
+					}, 0);
+				}
+				aWindow.ToggleLaunchpadWindow(true);
 			}
 		},
 		init : function()
@@ -739,8 +738,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	{
 		progressListener.uninit();
 		pageLoadListener.uninit();
-		tabSelectListener.uninit();
-		removeButton(document, button);
+		toolbarButton.uninit();
 		aWindow.removeEventListener('unload', onUnload);
 	}
 
@@ -748,7 +746,7 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	{
 		progressListener.uninit();
 		pageLoadListener.uninit();
-		tabSelectListener.uninit();
+		toolbarButton.uninit();
 		onShutdown.remove(shutdownHandler);
 	}
 
@@ -757,23 +755,3 @@ WindowObserver.addListener('navigator:browser', 'load', function(aWindow)
 	aWindow.addEventListener('unload', onUnload, false);
 });
 
-function subString(aString, aLength)
-{
-	let pattern = /[^\x00-\xff]/g;
-	let length = aString.replace(pattern, '**').length;
-
-	let output = '';
-	let char;
-	let tempLength = 0;
-	for (let i = 0; i < aString.length; i++)
-	{
-		char = aString.charAt(i).toString();
-		if (char.match(pattern) == null) tempLength++;
-		else tempLength += 2;
-		if (tempLength > aLength) break;
-		output += char;
-	}
-	if (length > aLength) output += '...';
-
-	return output;
-}

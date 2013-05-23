@@ -73,7 +73,7 @@ Launchpad.speeddial = (function()
 			this[index] = item;
 			bookmarkIndexes[item.id] = index;
 			bookmarkIndexes.setItem(item.id, index);
-			if (item.type == speeddial.BOOKMARK_TYPE_BOOKMARK || item.type == speeddial.BOOKMARK_TYPE_LIVEMARK)
+			if (item.type == speeddial.BOOKMARK_TYPE_BOOKMARK/* || item.type == speeddial.BOOKMARK_TYPE_LIVEMARK*/)
 			{
 				updateElementDimensions = true;
 				buttonIndexes.setItem(item.id, buttonIndexes.length);
@@ -91,7 +91,7 @@ Launchpad.speeddial = (function()
 			{
 				let {id, index, type} = speeddial[i];
 				speeddial.bookmarkIndexes.setItem(id, i);
-				if (type == speeddial.BOOKMARK_TYPE_BOOKMARK || type == speeddial.BOOKMARK_TYPE_LIVEMARK)
+				if (type == speeddial.BOOKMARK_TYPE_BOOKMARK/* || type == speeddial.BOOKMARK_TYPE_LIVEMARK*/)
 				{
 					changeButtonIndex = true;
 					let index = speeddial.buttonIndexes.getItem(id);
@@ -114,7 +114,7 @@ Launchpad.speeddial = (function()
 			}
 		}
 
-		if (type == speeddial.BOOKMARK_TYPE_FOLDER || type == speeddial.BOOKMARK_TYPE_SEPARATOR) return;
+		if (type != speeddial.BOOKMARK_TYPE_BOOKMARK/* && type != speeddial.BOOKMARK_TYPE_LIVEMARK*/) return;
 
 		item.__defineGetter__('buttonIndex', function() buttonIndexes.getItem(this.id));
 		item.__defineGetter__('title', function() title);
@@ -144,7 +144,7 @@ Launchpad.speeddial = (function()
 				let {id, type} = speeddial[i];
 				speeddial.bookmarkIndexes.setItem(id, i);
 
-				if (type == speeddial.BOOKMARK_TYPE_BOOKMARK || type == speeddial.BOOKMARK_TYPE_LIVEMARK)
+				if (type == speeddial.BOOKMARK_TYPE_BOOKMARK/* || type == speeddial.BOOKMARK_TYPE_LIVEMARK*/)
 				{
 					speeddial.buttonIndexes.setItem(id, speeddial.buttonIndexes.getItem(id) - 1);
 				}
@@ -272,7 +272,7 @@ Launchpad.speeddial = (function()
 
 			this.bookmarkIndexes.setItem(id, i);
 
-			if (changeButtonIndex && (type == this.BOOKMARK_TYPE_BOOKMARK || type == this.BOOKMARK_TYPE_LIVEMARK) &&
+			if (changeButtonIndex && (type == this.BOOKMARK_TYPE_BOOKMARK/* || type == this.BOOKMARK_TYPE_LIVEMARK*/) &&
 			    this.buttonIndexes.getItem(id) != undefined && id != idForFromIndex)
 			{
 				if (aFromIndex > aToIndex)
@@ -342,7 +342,7 @@ Launchpad.speeddial = (function()
 		{
 			let {type} = speeddial[aIndex];
 
-			if (type == speeddial.BOOKMARK_TYPE_BOOKMARK || type == speeddial.BOOKMARK_TYPE_LIVEMARK)
+			if (type == speeddial.BOOKMARK_TYPE_BOOKMARK/* || type == speeddial.BOOKMARK_TYPE_LIVEMARK*/)
 			{
 				speeddial[aIndex].remove();
 			}
@@ -953,7 +953,8 @@ Launchpad.speeddial = (function()
 			{
 				for (let i = 0; i < speeddial.length; i++)
 				{
-					speeddial[i].element.removeImmediate();
+					let {element} = speeddial[i];
+					element && element.removeImmediate();
 				}
 			}
 		};

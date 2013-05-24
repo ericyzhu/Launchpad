@@ -14,7 +14,6 @@ let livemarksService = Cc['@mozilla.org/browser/livemark-service;2'].getService(
 var annotationService = Cc['@mozilla.org/browser/annotation-service;1'].getService(Ci.nsIAnnotationService);
 
 let {Prefs} = require('Prefs');
-let {NAME : ADDON_NAME} = addonData;
 
 let rootFolder;
 
@@ -412,7 +411,7 @@ let observer =
 
 function init()
 {
-	rootFolder = BookmarkUtils.getBookmark(Prefs.bookmarksFolderID);
+	rootFolder = Prefs.bookmarksFolderID > -1 ? BookmarkUtils.getBookmark(Prefs.bookmarksFolderID) : null;
 
 	if ( ! rootFolder || rootFolder.type != BookmarkUtils.TYPE_FOLDER)
 	{
@@ -421,7 +420,7 @@ function init()
 		for (let i in bookmarks)
 		{
 			let bookmark = bookmarks[i];
-			if (bookmark.title == ADDON_NAME)
+			if (bookmark.title == 'Launchpad')
 			{
 				rootFolder = bookmark;
 				break;
@@ -434,7 +433,7 @@ function init()
 			{
 				folderID : bookmarksService.bookmarksMenuFolder,
 				type     : BookmarkUtils.TYPE_FOLDER,
-				title    : ADDON_NAME,
+				title    : 'Launchpad',
 				index    : BookmarkUtils.DEFAULT_INDEX
 			};
 

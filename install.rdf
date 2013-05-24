@@ -25,7 +25,6 @@
             <Description>
                 <em:locale>en-US</em:locale>
                 <em:creator>Eric Y. Chu</em:creator>
-                <em:name>Launchpad</em:name>
                 <em:description>Visual bookmarks extension.</em:description>
             </Description>
         </em:localized>
@@ -33,7 +32,6 @@
             <Description>
                 <em:locale>zh-CN</em:locale>
                 <em:creator>朱炎</em:creator>
-                <em:name>Launchpad</em:name>
                 <em:description>Launchpad 是一个通过可视化书签的方式来实现快速拨号功能的扩展。你只需点击工具栏中的 Launchpad 按钮或按下设置好的快捷键即可在任何页面来显示并使用它。该扩展也支持通过设置好的快捷键或者通过拖拽链接或标签到 Launchpad 按钮来快速添加拨号键。当 Launchpad 打开时，也可以通过拖拽链接或标签到已存在的拨号键或加号键上来更新或添加。添加的拨号键（即书签）保存在书签菜单的 Launchpad 文件夹内，当你不再需要这个扩展并卸载它后，保存的书签也不会丢失，但缩略图将会完全从你的电脑中移除。</em:description>
             </Description>
         </em:localized>

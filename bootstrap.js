@@ -29,7 +29,6 @@ const REASON =
 
 let {Services} = Cu.import('resource://gre/modules/Services.jsm', null);
 let {XPCOMUtils} = Cu.import('resource://gre/modules/XPCOMUtils.jsm');
-let {AddonManager} = Cu.import('resource://gre/modules/AddonManager.jsm');
 
 let addonData, scopes, shutdownHandlers;
 

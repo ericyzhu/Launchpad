@@ -7,7 +7,7 @@
     overflow-y: auto;
     cursor: default;
     padding: 0;
-    background-color: rgba(125,127,130, .9);
+    background: none;
 }
 
 a,
@@ -22,10 +22,26 @@ input
     -moz-user-select: text;
 }
 
+hbox menulist:last-child,
+hbox button:last-child
+{
+    margin-right: 0;
+}
+
 span::-moz-selection,
 description::-moz-selection
 {
     background: none;
+}
+
+#background
+{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    background-color: rgba(125,127,130, 1);
 }
 
 #scrollbox
@@ -69,7 +85,7 @@ description::-moz-selection
     box-shadow: inset 0 0 8px rgba(0,0,0,.3), 0 0 1px rgba(255,255,255,.6);
     transition-property: opacity;
     transition: 250ms ease;
-    background-color: rgb(126,127,130);
+    background-color: rgba(0,0,0,.1);
     font-weight: bold;
     font-family: sans-serif;
 }
@@ -93,7 +109,7 @@ description::-moz-selection
 #dialpad-add-button:hover span
 {
     box-shadow: inset 0 0 8px rgba(0,0,0,.4), 0 0 1px rgba(255,255,255,.8);
-    background-color: rgb(123,124,127);
+    background-color: rgba(0,0,0,.2);
 }
 #dialpad-add-button:hover span:after
 {
@@ -103,7 +119,7 @@ description::-moz-selection
 #dialpad-add-button.active span
 {
     box-shadow: inset 0 0 8px rgba(0,0,0,.3), 0 0 1px rgba(255,255,255,.6);
-    background-color: rgb(126,127,130);
+    background-color: rgba(0,0,0,.25);
 }
 #dialpad-add-button.active span:after
 {
@@ -381,12 +397,6 @@ div.range-slider div.scaleplate span:last-child
 .popup row:last-child
 {
     padding-bottom: 0;
-}
-
-.popup label,
-.popup menulist
-{
-    margin: 2px 0;
 }
 
 .popup menulist

@@ -33,5 +33,5 @@ const DIALPAD_BUTTON_REMOVE_BUTTON_CLASS = 'dialpad-button-remove-button';
 const DIALPAD_BUTTON_LOADING_CLASS = 'dialpad-button-loading';
 const DIALPAD_BUTTON_THUMBNAIL_DEFAULT = window.devicePixelRatio == 2 ?
                                          addonData.SKIN_DIR_URI + 'icons/blank.png' : addonData.SKIN_DIR_URI + 'icons/blank@2x.png';
-
+const nsIFilePicker = Ci.nsIFilePicker;
 let scrollbox = document.getElementById(SCROLLBOX_ID), container = document.getElementById(CONTAINER_ID), Launchpad = {};

@@ -11,7 +11,7 @@ Cu.import('resource://gre/modules/NetUtil.jsm');
 let bookmarksService = Cc['@mozilla.org/browser/nav-bookmarks-service;1'].getService(Ci.nsINavBookmarksService);
 let historyService = Cc['@mozilla.org/browser/nav-history-service;1'].getService(Ci.nsINavHistoryService);
 let livemarksService = Cc['@mozilla.org/browser/livemark-service;2'].getService(Ci.mozIAsyncLivemarks);
-var annotationService = Cc['@mozilla.org/browser/annotation-service;1'].getService(Ci.nsIAnnotationService);
+let annotationService = Cc['@mozilla.org/browser/annotation-service;1'].getService(Ci.nsIAnnotationService);
 
 let {Prefs} = require('Prefs');
 
@@ -50,26 +50,48 @@ let BookmarkUtils = exports.BookmarkUtils =
 	get STATUS_SUCCESS() 0,
 	get STATUS_ERROR()   1,
 
-	addLivemark : function(aLivemarkInfo)
+	addLivemark : function(aLivemarkInfo, aCallback)
 	{
-		livemarksService.addLivemark(aLivemarkInfo);
+		try
+		{
+			livemarksService.addLivemark(aLivemarkInfo,
+			{
+				onCompletion : function(aStatus, aLivemark)
+				{
+					if (Components.isSuccessCode(aStatus) && aLivemark)
+					{
+						aCallback && aCallback(aLivemark.id);
+					}
+				}
+			});
+		}
+		catch (e)
+		{
+			Cu.reportError(e);
+		}
 	},
 
 	addBookmark : function(aBookmarkInfo, aCallback)
 	{
 		try
 		{
+			let id;
 			switch (aBookmarkInfo.type)
 			{
 				case this.TYPE_BOOKMARK:
-					if (bookmarksService.insertBookmark(aBookmarkInfo.folderID, NetUtil.newURI(autocompleURI(aBookmarkInfo.uri)), aBookmarkInfo.index, aBookmarkInfo.title))
+					id = bookmarksService.insertBookmark(aBookmarkInfo.folderID, NetUtil.newURI(autocompleURI(aBookmarkInfo.uri)), aBookmarkInfo.index, aBookmarkInfo.title);
+					if (id)
 					{
-						aCallback && aCallback();
+						aCallback && aCallback(id);
 					}
 					break;
 
 				case this.TYPE_FOLDER:
-					bookmarksService.createFolder(aBookmarkInfo.folderID, aBookmarkInfo.title, aBookmarkInfo.index);
+					id = bookmarksService.createFolder(aBookmarkInfo.folderID, aBookmarkInfo.title, aBookmarkInfo.index);
+					if (id)
+					{
+						aCallback && aCallback(id);
+					}
 					break;
 
 				case this.TYPE_LIVEMARK:
@@ -78,11 +100,14 @@ let BookmarkUtils = exports.BookmarkUtils =
 						parentId : aBookmarkInfo.folderID,
 						index    : aBookmarkInfo.index,
 						feedURI  : NetUtil.newURI(autocompleURI(aBookmarkInfo.uri))
-					});
+					}, aCallback);
 					break;
 			}
 		}
-		catch (e) {}
+		catch (e)
+		{
+			Cu.reportError(e);
+		}
 	},
 
 	updateBookmark : function(aBookmarkInfo)
@@ -108,7 +133,10 @@ let BookmarkUtils = exports.BookmarkUtils =
 				bookmarksService.moveItem(aBookmarkInfo.id, aBookmarkInfo.folderID, aBookmarkInfo.index > oldBookmark.index ? aBookmarkInfo.index + 1 : aBookmarkInfo.index);
 			}
 		}
-		catch (e) {}
+		catch (e)
+		{
+			Cu.reportError(e);
+		}
 	},
 
 	getBookmarkURI : function(aID, aType)
@@ -437,9 +465,9 @@ function init()
 				index    : BookmarkUtils.DEFAULT_INDEX
 			};
 
-			rootFolder.id = BookmarkUtils.addBookmark(rootFolder, function(aBookmark)
+			rootFolder.id = BookmarkUtils.addBookmark(rootFolder, function(aID)
 			{
-				Prefs.bookmarksFolderID = aBookmark.id;
+				Prefs.bookmarksFolderID = aID;
 
 			});
 		}

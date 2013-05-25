@@ -7,6 +7,7 @@
 'use strict';
 
 let {Services, atob, btoa} = Cu.import('resource://gre/modules/Services.jsm', null);
+let {Prefs} = require('Prefs');
 
 let HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 let queue = [];
@@ -20,8 +21,8 @@ exports.Snapshot =
 	get DEFAULT_HEIGHT()    800,
 	get BOOKMARK_WIDTH()    512,
 	get BOOKMARK_HEIGHT()   320,
-	get CAPTURE_DELAY()     2 * 1000,
-	get CAPTURE_TIMEOUT()   30 * 1000,
+	get CAPTURE_DELAY()     Prefs.captureDelay * 1000,
+	get CAPTURE_TIMEOUT()   Prefs.captureTimeout * 1000,
 	get CONTENT_TYPE()      'image/png',
 
 	getScreenSize : function()

@@ -1,7 +1,13 @@
-<!ENTITY panelSettings.zoomMode.label     "缩放：">
-<!ENTITY panelSettings.zoomMode.automatic "自动">
-<!ENTITY panelSettings.zoomMode.manual    "手动">
-<!ENTITY panelSettings.zoomLevel.label    "缩放级别：">
+<!ENTITY panelSettings.useBackgroundImage.label          "背景图片：">
+<!ENTITY panelSettings.backgroundImage.select.label      "选择…">
+<!ENTITY panelSettings.backgroundImageMode.bestFit.label "最佳适配">
+<!ENTITY panelSettings.backgroundImageMode.center.label  "居中">
+<!ENTITY panelSettings.backgroundImageMode.stretch.label "拉伸">
+<!ENTITY panelSettings.backgroundImageMode.tile.label    "平铺">
+<!ENTITY panelSettings.zoomMode.label                    "缩放：">
+<!ENTITY panelSettings.zoomMode.automatic.label          "自动">
+<!ENTITY panelSettings.zoomMode.manual.label             "手动">
+<!ENTITY panelSettings.zoomLevel.label                   "缩放级别：">
 
 <!ENTITY panelEditItem.address.label   "地址：">
 <!ENTITY panelEditItem.address.tooltip "在此输入网页地址">
@@ -11,17 +17,17 @@
 <!ENTITY button.done.label   "完成">
 <!ENTITY button.cancel.label "取消">
 
-<!ENTITY popupEditItem.remove      "移除">
-<!ENTITY popupEditItem.edit        "编辑…">
-<!ENTITY popupEditItem.reload      "重新载入">
-<!ENTITY popupEditItem.reloadEvery "自动重新载入">
-<!ENTITY popupEditItem.30minutes   "三十分钟">
-<!ENTITY popupEditItem.1hour       "一小时">
-<!ENTITY popupEditItem.2hours      "两小时">
-<!ENTITY popupEditItem.6hours      "六小时">
-<!ENTITY popupEditItem.custom      "自定义…">
-<!ENTITY popupEditItem.never       "永不">
-<!ENTITY popupEditItem.pageDefault "网页默认">
+<!ENTITY popupEditItem.remove.label      "移除">
+<!ENTITY popupEditItem.edit.label        "编辑…">
+<!ENTITY popupEditItem.reload.label      "重新载入">
+<!ENTITY popupEditItem.reloadEvery.label "自动重新载入频率">
+<!ENTITY popupEditItem.30minutes.label   "三十分钟">
+<!ENTITY popupEditItem.1hour.label       "一小时">
+<!ENTITY popupEditItem.2hours.label      "两小时">
+<!ENTITY popupEditItem.6hours.label      "六小时">
+<!ENTITY popupEditItem.custom.label      "自定义…">
+<!ENTITY popupEditItem.never.label       "永不">
+<!ENTITY popupEditItem.pageDefault.label "网页默认">
 
 <!ENTITY options.WindowTitle           "偏好设置">
 <!ENTITY options.openLaunchpad         "打开 Launchpad：">
@@ -29,3 +35,5 @@
 <!ENTITY options.setAsHomepage         "设为主页">
 <!ENTITY options.loadInNewTab          "在“新标签页”中载入">
 <!ENTITY options.loadInBlankNewWindows "在空白的新窗口中载入">
+<!ENTITY options.captureDelay          "截图延迟时长：">
+<!ENTITY options.captureTimeout        "截图超时限制：">

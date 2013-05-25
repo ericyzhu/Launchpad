@@ -41,8 +41,6 @@ exports.Thumbnail =
 		let lastModifiedTime = file.exists() ? file.lastModifiedTime : 0;
 		let listener = listeners[leafName];
 
-		berore(leafName, file);
-
 		let callback = function(aStatus, aFile, aDocumentTitle)
 		{
 			if (aStatus == this.STATUS_SUCCESS)
@@ -86,6 +84,8 @@ exports.Thumbnail =
 
 		if ( ! file.exists() || aFarce)
 		{
+			berore(leafName, file);
+
 			Snapshot.captureForBookmark(aURI, function(aStatus, aData, aDocumentTitle)
 			{
 				if (aStatus == Snapshot.STATUS_DRAW_ERROR)

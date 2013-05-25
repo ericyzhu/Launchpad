@@ -6,13 +6,32 @@
 
 'use strict';
 
+Cu.import('resource://gre/modules/PluralForm.jsm');
+
 let {KeysMap : {KEYCODES, MODIFIERS}} = require('KeysMap');
 let {Prefs, PrefListener} = require('Prefs');
 let {Localization} = require('Localization');
 let locale = Localization.getBundle('locale');
+let getString, captureDelaySecondsLabel, captureTimeoutSecondsLabel;
 
 const HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
 const OS = Services.appinfo.OS;
+
+function updateSecondsLabel(aEvent)
+{
+	let {id, value} = aEvent.target;
+	let secondsText = PluralForm.get(value, getString('seconds'));
+	switch (id)
+	{
+		case 'pref-capture-delay':
+			captureDelaySecondsLabel.value = secondsText;
+			break;
+
+		case 'pref-capture-timeout':
+			captureTimeoutSecondsLabel.value = secondsText;
+			break;
+	}
+}
 
 function createkeystrokeRecorder(aControl)
 {
@@ -258,4 +277,9 @@ function createkeystrokeRecorder(aControl)
 window.addEventListener('load', function()
 {
 	Array.prototype.forEach.call(document.querySelectorAll('vbox[class="setting-box keystroke-recorder"]'), createkeystrokeRecorder);
+	getString = function(aString) document.getElementById('strings').getString(aString);
+	captureDelaySecondsLabel = document.getElementById('capture-delay-seconds-label');
+	captureTimeoutSecondsLabel = document.getElementById('capture-timeout-seconds-label');
+	captureDelaySecondsLabel.value = PluralForm.get(document.getElementById('capture-delay').value, getString('seconds'));
+	captureTimeoutSecondsLabel.value = PluralForm.get(document.getElementById('capture-timeout').value, getString('seconds'));
 }, false);

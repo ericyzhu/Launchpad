@@ -31,7 +31,7 @@ let PREF_TYPE =
 let TYPE_MAP =
 {
 	boolean : [getBoolPref,   setBoolPref],
-	number  : [getObjectPref, setObjectPref],
+	number  : [getIntPref,    setIntPref],
 	string  : [getCharPref,   setCharPref],
 	object  : [getObjectPref, setObjectPref]
 };
@@ -40,6 +40,8 @@ function getBoolPref(aBranch, aName) aBranch.getBoolPref(aName);
 function setBoolPref(aBranch, aName, aValue) aBranch.setBoolPref(aName, aValue);
 function getCharPref(aBranch, aName) aBranch.getCharPref(aName);
 function setCharPref(aBranch, aName, aValue) aBranch.setCharPref(aName, aValue);
+function getIntPref(aBranch, aName) aBranch.getIntPref(aName);
+function setIntPref(aBranch, aName, aValue) aBranch.setIntPref(aName, parseInt(aValue));
 function getObjectPref(aBranch, aName) JSON.parse(aBranch.getCharPref(aName));
 function setObjectPref(aBranch, aName, aValue) aBranch.setCharPref(aName, JSON.stringify(aValue));
 
@@ -57,7 +59,7 @@ let uninstallHandler = function()
 	{
 		setCharPref(browserBranch, 'newtab.url', exports.Prefs.originalNewTabURL);
 	}
-	branch.deleteBranch();
+	branch.deleteBranch('');
 };
 
 let disableHandler = function()
@@ -214,10 +216,11 @@ function init()
 
 			let value = aDefaultValue;
 
-			if (branchPrefType == 'invalid' || branchPrefType != ((defaultPrefType == 'number' || defaultPrefType == 'object') ? 'string' : defaultPrefType))
+			if (branchPrefType == 'invalid' || branchPrefType != (defaultPrefType == 'object' ? 'string' : defaultPrefType))
 			{
 				try
 				{
+					branch.deleteBranch(aName);
 					setter(branch, aName, aDefaultValue);
 				}
 				catch(e)
@@ -306,6 +309,8 @@ function init()
 	{
 		exports.Prefs.version = ADDON_VERSION;
 	}
+
+
 }
 
 exports.PrefListener =

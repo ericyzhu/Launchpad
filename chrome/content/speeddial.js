@@ -537,14 +537,14 @@ Launchpad.speeddial = (function()
 			zoomAdjuster.value = Prefs.dialpadButtonRatio * 100;
 			zoomAdjuster.readOnly = Prefs.dialpadButtonAutosizeEnabled;
 			zoomPercentage.textContent = (Prefs.dialpadButtonRatio * 100) + '%';
-			zoomAdjuster.addEventListener('change', function(e)
+			zoomAdjuster.addEventListener('change', function()
 			{
 				let value = Math.round(zoomAdjuster.value);
 				Prefs.dialpadButtonRatio = value / 100;
 				zoomPercentage.textContent = value + '%';
 			}, false);
 
-			zoomMode.addEventListener('command', function(e)
+			zoomMode.addEventListener('command', function()
 			{
 				let value = zoomMode.value == 1;
 				Prefs.dialpadButtonAutosizeEnabled = value;
@@ -552,23 +552,6 @@ Launchpad.speeddial = (function()
 			}, false);
 
 			updateButtonPositon();
-
-			PrefListener.add(listener);
-			window.addEventListener('beforeunload', function(e) PrefListener.remove(listener), false);
-
-			function listener(aName, aValue)
-			{
-				switch (aName)
-				{
-					case 'dialpadButtonRatio':
-						zoomAdjuster.value = aValue * 100;
-						break;
-
-					case 'dialpadButtonAutosizeEnabled':
-						zoomMode.value = aValue << 0;
-						break;
-				}
-			}
 
 			function updateButtonPositon()
 			{
@@ -613,6 +596,128 @@ Launchpad.speeddial = (function()
 				gNavToolboxObserver.disconnect();
 				gNavToolboxObserver = null;
 			}, false);
+
+			let backgroundDiv = document.getElementById('background');
+			let useBackgroundImageCheckBox = document.getElementById('use-background-image');
+			let backgroundImageModeMenulist = document.getElementById('background-image-mode');
+			let selectBackgroundImageButton = document.getElementById('select-background-image');
+
+			useBackgroundImageCheckBox.addEventListener('command', function()
+			{
+				Prefs.useBackgroundImage = useBackgroundImageCheckBox.getAttribute('checked') == 'true';
+			}, false);
+
+			backgroundImageModeMenulist.addEventListener('command', function()
+			{
+				let value = backgroundImageModeMenulist.value;
+				Prefs.backgroundImageMode = value;
+			}, false);
+
+			selectBackgroundImageButton.addEventListener('command', function()
+			{
+				let filePicker = Cc['@mozilla.org/filepicker;1'].createInstance(nsIFilePicker);
+				filePicker.init(window, locale.selectFile, nsIFilePicker.modeOpen);
+				filePicker.appendFilters(nsIFilePicker.filterImages);
+				filePicker.appendFilters(nsIFilePicker.filterAll);
+				let res = filePicker.open(function(aResult)
+				{
+					if (aResult != nsIFilePicker.returnCancel)
+					{
+						Prefs.backgroundImagePath = filePicker.fileURL.spec;
+					}
+				});
+			}, false);
+
+			useBackgroundImageCheckBox.setAttribute('checked', Prefs.useBackgroundImage);
+			backgroundImageModeMenulist.value = Prefs.backgroundImageMode;
+			if (Prefs.useBackgroundImage)
+			{
+				backgroundImageModeMenulist.setAttribute('disabled', false);
+				selectBackgroundImageButton.setAttribute('disabled', false);
+				backgroundDiv.style.backgroundImage = 'url("' + Prefs.backgroundImagePath + '")';
+				setBackgroundMode(Prefs.backgroundImageMode);
+			}
+			else
+			{
+				backgroundImageModeMenulist.setAttribute('disabled', true);
+				selectBackgroundImageButton.setAttribute('disabled', true);
+			}
+
+			function setBackgroundMode(aMode)
+			{
+				switch (aMode)
+				{
+					case 1:
+						backgroundDiv.style.backgroundRepeat = 'no-repeat';
+						backgroundDiv.style.backgroundSize = 'cover';
+						backgroundDiv.style.backgroundPosition = '50% 50%';
+						backgroundDiv.style.backgroundAttachment = 'fixed';
+						break;
+					case 2:
+						backgroundDiv.style.backgroundRepeat = 'no-repeat';
+						backgroundDiv.style.backgroundSize = 'auto';
+						backgroundDiv.style.backgroundPosition = '50% 50%';
+						backgroundDiv.style.backgroundAttachment = 'scroll';
+						break;
+					case 3:
+						backgroundDiv.style.backgroundRepeat = 'no-repeat';
+						backgroundDiv.style.backgroundSize = '100% 100%';
+						backgroundDiv.style.backgroundPosition = '0 0';
+						backgroundDiv.style.backgroundAttachment = 'scroll';
+						break;
+					case 4:
+						backgroundDiv.style.backgroundRepeat = 'repeat';
+						backgroundDiv.style.backgroundSize = 'auto';
+						backgroundDiv.style.backgroundPosition = '0 0';
+						backgroundDiv.style.backgroundAttachment = 'scroll';
+						break;
+				}
+			}
+
+
+
+			PrefListener.add(listener);
+			window.addEventListener('beforeunload', function(e) PrefListener.remove(listener), false);
+
+			function listener(aName, aValue)
+			{
+				switch (aName)
+				{
+					case 'useBackgroundImage':
+						useBackgroundImageCheckBox.setAttribute('checked', aValue);
+						if (Prefs.useBackgroundImage)
+						{
+							backgroundImageModeMenulist.setAttribute('disabled', false);
+							selectBackgroundImageButton.setAttribute('disabled', false);
+							backgroundDiv.style.backgroundImage = 'url("' + Prefs.backgroundImagePath + '")';
+							setBackgroundMode(Prefs.backgroundImageMode);
+						}
+						else
+						{
+							backgroundImageModeMenulist.setAttribute('disabled', true);
+							selectBackgroundImageButton.setAttribute('disabled', true);
+							backgroundDiv.style.backgroundImage = 'none';
+						}
+						break;
+
+					case 'backgroundImageMode':
+						backgroundImageModeMenulist.value = aValue;
+						setBackgroundMode(aValue);
+						break;
+
+					case 'backgroundImagePath':
+						backgroundDiv.style.backgroundImage = 'url("' + aValue + '")';
+						break;
+
+					case 'dialpadButtonRatio':
+						zoomAdjuster.value = aValue * 100;
+						break;
+
+					case 'dialpadButtonAutosizeEnabled':
+						zoomMode.value = aValue << 0;
+						break;
+				}
+			}
 		})();
 	};
 

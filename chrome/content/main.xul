@@ -21,11 +21,11 @@
     <popupset>
         <panel id="popup-autocomplete-richresult" type="autocomplete-richlistbox" noautofocus="true" ignorekeys="true" level="top" consumeoutsideclicks="false"/>
         <menupopup id="popup-edit-item" oncommand="Launchpad.speeddial.contextmenuCommand(event, event.target.id, this.index);">
-            <menuitem id="popup-edit-item-edit" label="&popupEditItem.edit;"/>
+            <menuitem id="popup-edit-item-edit" label="&popupEditItem.edit.label;"/>
             <menuseparator/>
-            <menuitem id="popup-edit-item-reload" label="&popupEditItem.reload;"/>
+            <menuitem id="popup-edit-item-reload" label="&popupEditItem.reload.label;"/>
             <menuseparator/>
-            <menuitem id="popup-edit-item-remove" label="&popupEditItem.remove;"/>
+            <menuitem id="popup-edit-item-remove" label="&popupEditItem.remove.label;"/>
         </menupopup>
     </popupset>
     <keyset>
@@ -36,6 +36,8 @@
         <key keycode="VK_HOME" oncommand="ScrollByHomeKey();"/>
         <key keycode="VK_END" oncommand="ScrollByEndKey();"/>
     </keyset>
+
+    <html:div id="background"/>
 
     <scrollbox flex="1" id="scrollbox">
         <vbox id="container">
@@ -51,12 +53,26 @@
                 </columns>
                 <rows>
                     <row align="center">
+                        <checkbox id="use-background-image" label="&panelSettings.useBackgroundImage.label;"/>
+                        <hbox flex="1" align="center">
+                            <menulist id="background-image-mode" flex="1">
+                                <menupopup>
+                                    <menuitem value="1" label="&panelSettings.backgroundImageMode.bestFit.label;"/>
+                                    <menuitem value="2" label="&panelSettings.backgroundImageMode.center.label;"/>
+                                    <menuitem value="3" label="&panelSettings.backgroundImageMode.stretch.label;"/>
+                                    <menuitem value="4" label="&panelSettings.backgroundImageMode.tile.label;"/>
+                                </menupopup>
+                            </menulist><spacer/>
+                            <button id="select-background-image" label="&panelSettings.backgroundImage.select.label;"/>
+                        </hbox>
+                    </row>
+                    <row align="center">
                         <label control="zoom-mode" value="&panelSettings.zoomMode.label;"/>
                         <hbox>
                             <menulist id="zoom-mode" flex="1">
                                 <menupopup>
-                                    <menuitem value="1" label="&panelSettings.zoomMode.automatic;"/>
-                                    <menuitem value="0" label="&panelSettings.zoomMode.manual;"/>
+                                    <menuitem value="1" label="&panelSettings.zoomMode.automatic.label;"/>
+                                    <menuitem value="0" label="&panelSettings.zoomMode.manual.label;"/>
                                 </menupopup>
                             </menulist>
                         </hbox>

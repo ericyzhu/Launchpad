@@ -1,7 +1,13 @@
-<!ENTITY panelSettings.zoomMode.label     "Zoom: ">
-<!ENTITY panelSettings.zoomMode.automatic "Automatic">
-<!ENTITY panelSettings.zoomMode.manual    "Manual">
-<!ENTITY panelSettings.zoomLevel.label    "Zoom Level: ">
+<!ENTITY panelSettings.useBackgroundImage.label          "Background Image: ">
+<!ENTITY panelSettings.backgroundImage.select.label      "Select…">
+<!ENTITY panelSettings.backgroundImageMode.bestFit.label "Best Fit">
+<!ENTITY panelSettings.backgroundImageMode.center.label  "Center">
+<!ENTITY panelSettings.backgroundImageMode.stretch.label "Stretch">
+<!ENTITY panelSettings.backgroundImageMode.tile.label    "Tile">
+<!ENTITY panelSettings.zoomMode.label                    "Zoom: ">
+<!ENTITY panelSettings.zoomMode.automatic.label          "Automatic">
+<!ENTITY panelSettings.zoomMode.manual.label             "Manual">
+<!ENTITY panelSettings.zoomLevel.label                   "Zoom Level: ">
 
 <!ENTITY panelEditItem.address.label   "Address: ">
 <!ENTITY panelEditItem.address.tooltip "Enter web address here">
@@ -11,17 +17,17 @@
 <!ENTITY button.done.label   "OK">
 <!ENTITY button.cancel.label "Cancel">
 
-<!ENTITY popupEditItem.remove      "Remove">
-<!ENTITY popupEditItem.edit        "Edit…">
-<!ENTITY popupEditItem.reload      "Reload">
-<!ENTITY popupEditItem.reloadEvery "Reload Every">
-<!ENTITY popupEditItem.30minutes   "30 Minutes">
-<!ENTITY popupEditItem.1hour       "1 Hour">
-<!ENTITY popupEditItem.2hours      "2 Hours">
-<!ENTITY popupEditItem.6hours      "6 Hours">
-<!ENTITY popupEditItem.custom      "Custom…">
-<!ENTITY popupEditItem.never       "Never">
-<!ENTITY popupEditItem.pageDefault "Page Default">
+<!ENTITY popupEditItem.remove.label      "Remove">
+<!ENTITY popupEditItem.edit.label        "Edit…">
+<!ENTITY popupEditItem.reload.label      "Reload">
+<!ENTITY popupEditItem.reloadEvery.label "Reload Every">
+<!ENTITY popupEditItem.30minutes.label   "30 Minutes">
+<!ENTITY popupEditItem.1hour.label       "1 Hour">
+<!ENTITY popupEditItem.2hours.label      "2 Hours">
+<!ENTITY popupEditItem.6hours.label      "6 Hours">
+<!ENTITY popupEditItem.custom.label      "Custom…">
+<!ENTITY popupEditItem.never.label       "Never">
+<!ENTITY popupEditItem.pageDefault.label "Page Default">
 
 <!ENTITY options.WindowTitle           "Perferences">
 <!ENTITY options.openLaunchpad         "Open Launchpad: ">
@@ -29,3 +35,5 @@
 <!ENTITY options.setAsHomepage         "Set as homepage">
 <!ENTITY options.loadInNewTab          "Load in New Tab">
 <!ENTITY options.loadInBlankNewWindows "Load in blank new windows">
+<!ENTITY options.captureDelay          "Capture delay: ">
+<!ENTITY options.captureTimeout        "Capture timeout: ">

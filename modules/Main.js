@@ -12,10 +12,10 @@ Cu.import('resource://gre/modules/XPCOMUtils.jsm');
 let {ComponentRegistrar} = require('ComponentRegistrar');
 let {WindowObserver} = require('WindowObserver');
 let {FileUtils} = require('FileUtils');
-let {BookmarkUtils} = require('BookmarkUtils');
 let {Prefs, PrefListener} = require('Prefs');
-let {Storage} = require('Storage');
 let {Utils} = require('Utils');
+let {Storage} = require('Storage');
+let {BookmarkUtils} = require('BookmarkUtils');
 let {KeysMap : {KEYCODES, MODIFIERS}} = require('KeysMap');
 let {Localization} = require('Localization');
 let locale = Localization.getBundle('locale');
@@ -83,7 +83,7 @@ Storage.openConnection(FileUtils.getDataFile(['database.sqlite'], true),
 
 WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 {
-	let styleSheet, launchpadWindow, contextMenu, keyset;
+	let styleSheet, launchpadWindow, tabViewListener, contextMenu, keyset;
 	let gBrowser = aWindow.getBrowser(), {document} = aWindow, mainWindow = document.getElementById('main-window');
 
 	// register style sheet
@@ -119,6 +119,16 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 		resize : null,
 		_show : function()
 		{
+			let background = this.browser.contentDocument.getElementById('background');
+			if (gBrowser.selectedBrowser.contentDocument.URL == 'about:launchpad')
+			{
+				background.style.opacity = 1;
+			}
+			else
+			{
+				background.style.opacity = 0.9;
+			}
+
 			if (this.window.getAttribute('display') == 'hide')
 			{
 				this.window.setAttribute('display', 'show');
@@ -143,11 +153,12 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 			this.browser.blur();
 			aWindow.gURLBar.blur();
 		},
-		toggle : function(aState)
+		toggle : function(aState, aForce)
 		{
 			let windowState = false;
+			let force = aForce == true;
 
-			if (gBrowser.selectedBrowser.contentDocument.URL == 'about:launchpad')
+			if (gBrowser.selectedBrowser.contentDocument.URL == 'about:launchpad' && ! tabViewListener.isTabViewVisible())
 			{
 				if (this.window.getAttribute('display') == 'show')
 				{
@@ -248,9 +259,9 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 				try
 				{
 					let window = gBrowser.selectedBrowser.contentWindow;
-					launchpadWindow.addItemToLaunchpad(window.location.href, window.document.title);
+					this.addItemToLaunchpad(window.location.href, window.document.title);
 				} catch (e) {}
-			};
+			}.bind(this);
 
 			aWindow.AddLinkToLaunchpad = function()
 			{
@@ -264,8 +275,8 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 				{
 					linkText = gContextMenu.linkText();
 				}
-				launchpadWindow.addItemToLaunchpad(gContextMenu.linkURL, linkText);
-			};
+				this.addItemToLaunchpad(gContextMenu.linkURL, linkText);
+			}.bind(this);
 
 			aWindow.LaunchpadButtonEvents =
 			{
@@ -327,6 +338,38 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 			delete aWindow.LaunchpadButtonEvents;
 			this.window.parentNode.removeChild(this.window);
 			this.resize = null;
+		}
+	}.init();
+
+	tabViewListener =
+	{
+		gTabViewDeck : null,
+		isTabViewVisible : function()
+		{
+			let gTabViewFrame = document.getElementById('tab-view');
+			return gTabViewFrame && gTabViewFrame == this.gTabViewDeck.selectedPanel;
+		},
+		shownListener : function()
+		{
+			aWindow.ToggleLaunchpadWindow(false, true);
+		},
+		hiddenListener : function()
+		{
+			gBrowser.selectedBrowser.contentDocument.URL == 'about:launchpad' && aWindow.ToggleLaunchpadWindow(true);
+		},
+		init : function()
+		{
+			this.gTabViewDeck = document.getElementById('tab-view-deck');
+			aWindow.addEventListener('tabviewshown', this.shownListener, true);
+			aWindow.addEventListener('tabviewhidden', this.hiddenListener, true);
+
+			return this;
+		},
+		uninit : function()
+		{
+			aWindow.removeEventListener('tabviewshown', this.shownListener, true);
+			aWindow.removeEventListener('tabviewhidden', this.hiddenListener, true);
+			this.gTabViewDeck = null;
 		}
 	}.init();
 
@@ -534,6 +577,7 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 		contextMenu.uninit();
 		launchpadWindow.uninit();
 		styleSheet.uninit();
+		tabViewListener.uninit();
 		aWindow.removeEventListener('unload', onUnload);
 	}
 
@@ -542,6 +586,7 @@ WindowObserver.addListener('navigator:browser', 'ready', function(aWindow)
 		keyset.uninit();
 		contextMenu.uninit();
 		launchpadWindow.uninit();
+		tabViewListener.uninit();
 		onShutdown.remove(shutdownHandler);
 	}
 

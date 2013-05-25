@@ -11,15 +11,19 @@
     %launchpadDTD;
 ]>
 <prefwindow xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-            xmlns:html="http://www.w3.org/1999/xhtml"
             id="preferences-window"
             title="&options.WindowTitle;"
             windowtype="launchpad-mozest-org:options">
     <prefpane>
+        <stringbundleset>
+            <stringbundle id="strings" src="chrome://launchpad-mozest-org/locale/locale.properties"/>
+        </stringbundleset>
         <preferences>
             <preference id="pref-set-as-homepage" name="extensions.launchpad-mozest-org.setAsHomepage" type="bool"/>
             <preference id="pref-load-in-new-tab" name="extensions.launchpad-mozest-org.loadInNewTab" type="bool"/>
             <preference id="pref-load-in-blank-new-windows" name="extensions.launchpad-mozest-org.loadInBlankNewWindows" type="bool"/>
+            <preference id="pref-capture-delay" name="extensions.launchpad-mozest-org.captureDelay" type="int" onchange="updateSecondsLabel(event)"/>
+            <preference id="pref-capture-timeout" name="extensions.launchpad-mozest-org.captureTimeout" type="int" onchange="updateSecondsLabel(event)"/>
         </preferences>
         <vbox pack="center">
             <box pack="center" id="logo"/>
@@ -56,6 +60,20 @@
                             <spacer/>
                             <box class="setting-box">
                                 <checkbox id="load-in-blank-new-windows" label="&options.loadInBlankNewWindows;" preference="pref-load-in-blank-new-windows"/>
+                            </box>
+                        </row>
+                        <row align="center">
+                            <label value="&options.captureDelay;" control="capture-delay"/>
+                            <box class="setting-box" align="center">
+                                <textbox id="capture-delay" size="3" preference="pref-capture-delay"/>
+                                <label value="" id="capture-delay-seconds-label"/>
+                            </box>
+                        </row>
+                        <row align="center">
+                            <label value="&options.captureTimeout;" control="capture-timeout"/>
+                            <box class="setting-box" align="center">
+                                <textbox id="capture-timeout" size="3" preference="pref-capture-timeout"/>
+                                <label value="" id="capture-timeout-seconds-label"/>
                             </box>
                         </row>
                     </rows>
